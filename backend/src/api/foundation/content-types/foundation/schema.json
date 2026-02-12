@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "foundations",
+  "info": {
+    "singularName": "foundation",
+    "pluralName": "foundations",
+    "displayName": "Foundation"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "nombre": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "nit": {
+      "type": "biginteger"
+    },
+    "siglas": {
+      "type": "string"
+    },
+    "iniciatives": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::iniciative.iniciative",
+      "mappedBy": "foundation"
+    }
+  }
+}
