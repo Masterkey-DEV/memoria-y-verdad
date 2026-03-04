@@ -11,25 +11,19 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "titulo": {
+    "title": {
       "type": "string",
       "required": true
     },
-    "objetivo": {
+    "objective": {
       "type": "string",
       "required": true
     },
-    "descripcion": {
+    "description": {
       "type": "text",
       "required": true
     },
-    "foundation": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::foundation.foundation",
-      "inversedBy": "iniciatives"
-    },
-    "imagenes": {
+    "images": {
       "type": "media",
       "multiple": true,
       "required": true,
@@ -38,11 +32,17 @@
         "files"
       ]
     },
-    "category": {
+    "foundation": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "api::categorie.categorie",
-      "inversedBy": "initiatives"
+      "target": "api::foundation.foundation",
+      "inversedBy": "iniciatives"
+    },
+    "initiatives_categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::initiatives-category.initiatives-category",
+      "mappedBy": "initiatives"
     }
   }
 }

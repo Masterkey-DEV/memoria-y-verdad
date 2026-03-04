@@ -4,28 +4,44 @@
   "info": {
     "singularName": "foundation",
     "pluralName": "foundations",
-    "displayName": "Foundation"
+    "displayName": "foundation"
   },
   "options": {
     "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
-    "nombre": {
+    "name": {
       "type": "string",
       "required": true,
       "unique": true
     },
-    "nit": {
-      "type": "biginteger"
-    },
     "siglas": {
-      "type": "string"
+      "type": "string",
+      "required": true,
+      "unique": true
     },
     "iniciatives": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::iniciative.iniciative",
+      "mappedBy": "foundation"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
       "mappedBy": "foundation"
     }
   }

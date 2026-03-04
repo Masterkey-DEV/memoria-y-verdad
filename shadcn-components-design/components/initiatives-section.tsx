@@ -1,57 +1,105 @@
-import { apiURL } from "@/const/api";
-import { InitiativeCard } from "@/components/initiative-card";
+// @/components/initiatives-section.tsx
+"use client";
+
+import { useEffect, useState } from "react";
 import { getIniciatives } from "@/actions/initiative.actions";
-import { Initiative } from "@/types/initiative";
+import { InitiativeCard } from "@/components/initiative-card";
+import { useCategoryStore } from "@/store/useCategoryStore";
+import { API_URL } from "@/const/api";
+import { Lightbulb, Loader2 } from "lucide-react";
 
-export async function InitiativesSection() {
-  const result = await getIniciatives();
+export function InitiativesSection() {
+  // ✅ Lee directamente del store, igual que CategoriesSection
+  const selectedCategoryName = useCategoryStore((s) => s.selectedCategoryName);
 
-  if (!result.success) {
+  const [initiatives, setInitiatives] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      const result = await getIniciatives(selectedCategoryName);
+      if (result.success) {
+        setInitiatives(result.data);
+        setError(null);
+      } else {
+        setError("No se pudieron cargar las iniciativas");
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, [selectedCategoryName]);
+
+  if (loading) {
     return (
-      <section className="px-4 py-12 max-w-7xl mx-auto">
-        <p>Error cargando iniciativas</p>
-      </section>
+      <div className="flex flex-col items-center justify-center gap-4 py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground animate-pulse text-sm font-medium">
+          Cargando iniciativas...
+        </p>
+      </div>
     );
   }
 
-  const initiatives: Initiative[] = result.data;
+  if (error) {
+    return (
+      <div className="text-center py-20 bg-destructive/5 rounded-2xl border border-destructive/20 mx-4">
+        <p className="text-destructive font-medium">{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <section id="initiatives" className="px-4 py-12 md:py-24 max-w-7xl mx-auto">
-      <div className="flex items-end justify-between mb-8 md:mb-12">
-        <div className="space-y-2">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
-            Active Initiatives
-          </h2>
+    <section id="initiatives" className="px-4 py-8 max-w-7xl mx-auto">
+      <div className="mb-8 space-y-2">
+        <h2 className="text-3xl md:text-4xl font-black tracking-tight text-foreground">
+          {selectedCategoryName
+            ? `Iniciativas en ${selectedCategoryName}`
+            : "Iniciativas Destacadas"}
+        </h2>
+        <p className="text-muted-foreground text-base max-w-2xl leading-relaxed">
+          Participa en programas diseñados para impulsar tu crecimiento,
+          sanación y éxito profesional.
+        </p>
+      </div>
 
-          <p className="text-muted-foreground text-lg max-w-2xl">
-            Join a program designed to foster growth, healing, and professional
-            success.
+      {initiatives.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {initiatives.map((initiative) => {
+            const imageUrl = initiative.images?.[0]?.url
+              ? `${API_URL}${initiative.images[0].url}`
+              : "/placeholder.jpg";
+
+            const categoryName = initiative.initiatives_categories?.[0]?.name;
+
+            return (
+              <InitiativeCard
+                key={initiative.id}
+                documentId={initiative.documentId}
+                title={initiative.title}
+                organization={
+                  initiative.foundation?.name || "Organización Aliada"
+                }
+                description={initiative.objective}
+                imageSrc={imageUrl}
+                imageAlt={`Imagen de ${initiative.title}`}
+                category={categoryName}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div className="text-center py-20 border-2 border-dashed border-muted rounded-3xl bg-muted/5">
+          <Lightbulb className="mx-auto h-12 w-12 text-muted-foreground/20 mb-4" />
+          <p className="text-lg font-semibold text-foreground mb-1">
+            No encontramos resultados
+          </p>
+          <p className="text-muted-foreground text-sm">
+            No hay iniciativas activas en esta categoría. ¡Vuelve pronto!
           </p>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-        {initiatives.map((initiative: Initiative) => {
-          const imageUrl = initiative.imagenes?.[0]?.url
-            ? `${apiURL}${initiative.imagenes[0].url}`
-            : "/placeholder.jpg";
-
-          return (
-            <div key={initiative.id} className="flex h-full">
-              <InitiativeCard
-                title={initiative.titulo}
-                organization={initiative.foundation?.nombre || "Foundation"}
-                description={initiative.objetivo}
-                imageSrc={imageUrl}
-                imageAlt={initiative.titulo}
-                badge="NEW"
-                badgeVariant="new"
-              />
-            </div>
-          );
-        })}
-      </div>
+      )}
     </section>
   );
 }

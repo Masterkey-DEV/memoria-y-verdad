@@ -22,29 +22,41 @@ export interface StrapiImage {
 export interface Foundation {
   id: number;
   documentId: string;
-  nombre: string;
+
+  name: string;
   nit: string | null;
   siglas: string | null;
+
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
 }
 
+export interface Category {
+  id: number;
+  documentId: string;
+  name: string;
+}
+export interface foundation {
+  name: string;
+}
+
 export interface Initiative {
   id: number;
   documentId: string;
-
-  titulo: string;
-  objetivo: string;
-  descripcion: string;
-
+  title: string;
+  foundation: foundation;
+  objective: string;
+  description: string;
   createdAt: string;
-  updatedAt: string;
-  publishedAt: string;
-
-  foundation: Foundation;
-
-  imagenes: StrapiImage[];
+  category: Category; // Confirmado: campo 'category'
+  images: {
+    url: string;
+    formats?: {
+      medium?: { url: string };
+      small?: { url: string };
+    };
+  }[];
 }
 
 export interface StrapiResponse<T> {

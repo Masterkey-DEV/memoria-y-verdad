@@ -2,6 +2,123 @@
  * iniciative controller
  */
 
-import { factories } from '@strapi/strapi';
+import { factories } from "@strapi/strapi";
 
-export default factories.createCoreController('api::iniciative.iniciative');
+export default factories.createCoreController(
+  "api::iniciative.iniciative",
+  ({ strapi }) => ({
+    async create(ctx) {
+      if (!ctx.state.user) {
+        return ctx.unauthorized("Debes estar autenticado");
+      }
+
+      const { id: userId, role } = ctx.state.user;
+
+      if (role.name !== "foundation") {
+        return ctx.forbidden("Solo fundaciones pueden crear iniciativas");
+      }
+
+      const foundations = await strapi.entityService.findMany(
+        "api::foundation.foundation",
+        {
+          filters: { users_permissions_user: userId },
+        },
+      );
+
+      if (!foundations.length) {
+        return ctx.badRequest("No tienes una fundación registrada");
+      }
+
+      const initiative = await strapi.entityService.create(
+        "api::iniciative.iniciative",
+        {
+          data: {
+            ...ctx.request.body.data,
+            foundation: foundations[0].id,
+          },
+        },
+      );
+
+      const sanitized = await this.sanitizeOutput(initiative, ctx);
+      return this.transformResponse(sanitized);
+    },
+
+    async update(ctx) {
+      if (!ctx.state.user) {
+        return ctx.unauthorized("Debes estar autenticado");
+      }
+
+      const { id: userId, role } = ctx.state.user;
+      const { id } = ctx.params;
+
+      if (role.name !== "foundation") {
+        return ctx.forbidden("Solo fundaciones pueden editar iniciativas");
+      }
+
+      // Cast a "any" para acceder a relaciones populadas sin errores de TS
+      const initiative = (await strapi.entityService.findOne(
+        "api::iniciative.iniciative",
+        id,
+        {
+          populate: ["foundation", "foundation.users_permissions_user"],
+        },
+      )) as any;
+
+      if (!initiative) {
+        return ctx.notFound("Iniciativa no encontrada");
+      }
+
+      if (initiative.foundation?.users_permissions_user?.id !== userId) {
+        return ctx.forbidden("No tienes permiso para editar esta iniciativa");
+      }
+
+      const updated = await strapi.entityService.update(
+        "api::iniciative.iniciative",
+        id,
+        {
+          data: ctx.request.body.data,
+        },
+      );
+
+      const sanitized = await this.sanitizeOutput(updated, ctx);
+      return this.transformResponse(sanitized);
+    },
+
+    async delete(ctx) {
+      if (!ctx.state.user) {
+        return ctx.unauthorized("Debes estar autenticado");
+      }
+
+      const { id: userId, role } = ctx.state.user;
+      const { id } = ctx.params;
+
+      if (role.name !== "foundation") {
+        return ctx.forbidden("Solo fundaciones pueden eliminar iniciativas");
+      }
+
+      const initiative = (await strapi.entityService.findOne(
+        "api::iniciative.iniciative",
+        id,
+        {
+          populate: ["foundation", "foundation.users_permissions_user"],
+        },
+      )) as any;
+
+      if (!initiative) {
+        return ctx.notFound("Iniciativa no encontrada");
+      }
+
+      if (initiative.foundation?.users_permissions_user?.id !== userId) {
+        return ctx.forbidden("No tienes permiso para eliminar esta iniciativa");
+      }
+
+      const deleted = await strapi.entityService.delete(
+        "api::iniciative.iniciative",
+        id,
+      );
+
+      const sanitized = await this.sanitizeOutput(deleted, ctx);
+      return this.transformResponse(sanitized);
+    },
+  }),
+);

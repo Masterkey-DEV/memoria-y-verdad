@@ -1,6 +1,6 @@
-import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
-import { Quote } from "lucide-react"
+import Image from "next/image";
+import { Card, CardContent } from "@/components/ui/card";
+import { Quote } from "lucide-react";
 
 const stories = [
   {
@@ -8,16 +8,16 @@ const stories = [
       "The reintegration program gave me a second chance. Today I have my own tailoring business and feel like part of my community again.",
     name: "Maria Garcia",
     location: "Medellin, Colombia",
-    avatar: "/images/avatar-maria.jpg",
+    avatar: "/maria.jpeg",
   },
   {
     quote:
       "Joining the program wasn't easy, but it was worth it. I was at a low point and now I understand my potential.",
     name: "Carlos Mendez",
     location: "Bogota, Colombia",
-    avatar: "/images/avatar-carlos.jpg",
+    avatar: "/carlos.jpeg",
   },
-]
+];
 
 export function SuccessStories() {
   return (
@@ -59,5 +59,5 @@ export function SuccessStories() {
         ))}
       </div>
     </section>
-  )
+  );
 }
