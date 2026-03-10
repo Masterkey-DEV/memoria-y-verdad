@@ -43,6 +43,12 @@
       "relation": "manyToMany",
       "target": "api::initiatives-category.initiatives-category",
       "mappedBy": "initiatives"
+    },
+    "users_permissions_users": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "mappedBy": "initiatives"
     }
   }
 }

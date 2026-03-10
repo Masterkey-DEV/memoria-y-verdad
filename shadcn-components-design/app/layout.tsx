@@ -1,31 +1,35 @@
-import React from "react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-
 import "./globals.css";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
+import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "@/context/AuthContext";
 
-const _inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Reintegration Portal",
-  description:
-    "Supporting the peace process and victims' rights across Colombia. Connecting conflict victims with meaningful opportunities for social reintegration and community building.",
+  description: "Forjando un futuro de reconciliación",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="es">
-      <body className="font-sans antialiased">
-        <Header />
-        {children}
-
-        <Footer />
+    <html lang="es" className="scroll-smooth">
+      <body
+        className={`${inter.className} antialiased selection:bg-primary/30`}
+      >
+        <AuthProvider>
+          <Header />
+          {/* Añadimos un min-h para que el footer no flote en pantallas grandes */}
+          <main className="min-h-[80vh]">{children}</main>
+          <Footer />
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

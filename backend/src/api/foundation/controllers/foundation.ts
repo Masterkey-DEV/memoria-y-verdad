@@ -12,19 +12,29 @@ export default factories.createCoreController(
         return ctx.unauthorized("Debes estar autenticado");
       }
 
-      const { id: userId } = ctx.state.user;
+      const userId = ctx.state.user.id;
+      console.log("Usuario autenticado:", userId);
 
-      // Verificar que el usuario no tenga ya una fundación
+      /* ------------------------------------------------ */
+      /* 1. Verificar que el usuario no tenga fundación   */
+      /* ------------------------------------------------ */
+
       const existing = await strapi.entityService.findMany(
         "api::foundation.foundation",
         {
-          filters: { users_permissions_user: userId },
+          filters: {
+            users_permissions_user: userId,
+          },
         },
       );
 
-      if (existing.length > 0) {
+      if (Array.isArray(existing) && existing.length > 0) {
         return ctx.badRequest("Ya tienes una fundación registrada");
       }
+
+      /* ------------------------------------------------ */
+      /* 2. Crear la fundación                            */
+      /* ------------------------------------------------ */
 
       const foundation = await strapi.entityService.create(
         "api::foundation.foundation",
@@ -36,24 +46,58 @@ export default factories.createCoreController(
         },
       );
 
-      // Buscar el rol "foundation"
+      /* ------------------------------------------------ */
+      /* 3. Obtener rol foundation                        */
+      /* ------------------------------------------------ */
+
       const foundationRole = await strapi
         .query("plugin::users-permissions.role")
-        .findOne({ where: { name: "foundation" } });
+        .findOne({
+          where: {
+            type: "foundation",
+          },
+        });
 
       if (!foundationRole) {
-        return ctx.internalServerError('Rol "foundation" no encontrado');
+        return ctx.internalServerError(
+          'Rol "foundation" no encontrado. Créalo en Settings → Roles.',
+        );
       }
 
-      // Asignar el rol al usuario
+      /* ------------------------------------------------ */
+      /* 4. Asignar rol al usuario                        */
+      /* ------------------------------------------------ */
+
       await strapi.entityService.update(
         "plugin::users-permissions.user",
         userId,
-        { data: { role: foundationRole.id } },
+        {
+          data: {
+            role: foundationRole.id,
+          },
+        },
       );
 
+      /* ------------------------------------------------ */
+      /* 5. Generar JWT nuevo con rol actualizado         */
+      /* ------------------------------------------------ */
+
+      const freshJwt = strapi.plugin("users-permissions").service("jwt").issue({
+        id: userId,
+      });
+
+      /* ------------------------------------------------ */
+      /* 6. Respuesta final corregida                     */
+      /* ------------------------------------------------ */
+
       const sanitized = await this.sanitizeOutput(foundation, ctx);
-      return this.transformResponse(sanitized);
+      // Forzamos el cast a 'any' para evitar el error TS2698 de spread
+      const transformed = this.transformResponse(sanitized) as any;
+
+      return {
+        ...transformed,
+        jwt: freshJwt,
+      };
     },
 
     async update(ctx) {
@@ -61,14 +105,14 @@ export default factories.createCoreController(
         return ctx.unauthorized("Debes estar autenticado");
       }
 
-      const { id: userId, role } = ctx.state.user;
+      const userId = ctx.state.user.id;
+      const role = ctx.state.user.role;
       const { id } = ctx.params;
 
-      if (role.name !== "foundation") {
+      if (role.type !== "foundation") {
         return ctx.forbidden("Solo fundaciones pueden editar su perfil");
       }
 
-      // Cast a "any" para acceder a relaciones populadas sin errores de TS
       const foundation = (await strapi.entityService.findOne(
         "api::foundation.foundation",
         id,
@@ -102,10 +146,11 @@ export default factories.createCoreController(
         return ctx.unauthorized("Debes estar autenticado");
       }
 
-      const { id: userId, role } = ctx.state.user;
+      const userId = ctx.state.user.id;
+      const role = ctx.state.user.role;
       const { id } = ctx.params;
 
-      if (role.name !== "foundation") {
+      if (role.type !== "foundation") {
         return ctx.forbidden("Solo fundaciones pueden eliminar su perfil");
       }
 

@@ -43,6 +43,9 @@
       "relation": "oneToOne",
       "target": "plugin::users-permissions.user",
       "mappedBy": "foundation"
+    },
+    "objective": {
+      "type": "text"
     }
   }
 }

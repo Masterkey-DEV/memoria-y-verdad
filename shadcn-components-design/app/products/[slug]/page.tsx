@@ -1,4 +1,3 @@
-// @/app/productos/[slug]/page.tsx
 import { getProductBySlug } from "@/actions/product.actions";
 import { API_URL } from "@/const/api";
 import { Product } from "@/types/product";
@@ -28,7 +27,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8 md:py-16">
-      {/* Botón Volver */}
       <Link
         href="/products"
         className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-primary mb-8 transition-colors group"
@@ -38,9 +36,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
       </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Galería de Imagen */}
+        {/* Galería */}
         <div className="lg:col-span-7">
-          <div className="relative aspect-[4/5] md:aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl border bg-muted">
+          <div className="relative aspect-square rounded-[2.5rem] overflow-hidden shadow-2xl border bg-muted">
             <Image
               src={imageUrl}
               alt={product.name}
@@ -48,30 +46,28 @@ export default async function ProductDetailPage({ params }: PageProps) {
               className="object-cover"
               priority
             />
-            {product.featured && ( // Campo featured de tu modelo
-              <Badge className="absolute top-6 left-6 bg-primary text-primary-foreground px-4 py-1 rounded-full shadow-lg">
+            {product.featured && (
+              <Badge className="absolute top-6 left-6 bg-primary text-primary-foreground px-4 py-1 rounded-full">
                 Destacado
               </Badge>
             )}
           </div>
         </div>
 
-        {/* Información y Acciones */}
+        {/* Info */}
         <div className="lg:col-span-5 flex flex-col justify-center space-y-8">
           <div className="space-y-4">
-            {product.product_categories?.[0] && ( // Relación de tu modelo
-              <Badge
-                variant="secondary"
-                className="rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-wider"
-              >
-                {product.product_categories[0].name}
-              </Badge>
-            )}
-            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground leading-tight">
+            <Badge
+              variant="secondary"
+              className="rounded-full px-4 py-1 text-xs font-bold uppercase tracking-widest bg-primary/10 text-primary border-none"
+            >
+              {product.product_categories?.[0]?.name || "Iniciativa"}
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
               {product.name}
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed italic">
-              "{product.shortDescription}" {/* Campo de tu modelo */}
+            <p className="text-xl text-muted-foreground leading-relaxed italic border-l-4 pl-4 border-primary/20">
+              "{product.shortDescription}"
             </p>
           </div>
 
@@ -79,7 +75,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <span className="text-4xl font-bold text-primary">
               ${product.price.toLocaleString("es-CO")}
             </span>
-            {product.stock > 0 && ( // Campo stock de tu modelo
+            {product.stock > 0 && (
               <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">
                 {product.stock} disponibles
               </span>
@@ -87,7 +83,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
 
           <div className="prose prose-gray py-6 border-y border-border/60">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground mb-3">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
               Historia del producto
             </h3>
             <p className="text-foreground/80 leading-relaxed text-lg">
@@ -95,9 +91,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
             </p>
           </div>
 
-          {/* Botones de Acción Estéticos */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-            <Button className="rounded-2xl h-16 text-lg font-bold gap-3 shadow-xl shadow-primary/20 bg-green-600 hover:bg-green-700">
+            <Button className="rounded-2xl h-16 text-lg font-bold gap-3 shadow-xl shadow-green-500/20 bg-green-600 hover:bg-green-700">
               <MessageCircle className="h-6 w-6" />
               Apoyar Proyecto
             </Button>
@@ -105,10 +100,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <div className="flex gap-4">
               <Button
                 variant="outline"
-                className="flex-1 rounded-2xl h-16 border-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200 group transition-all"
+                className="flex-1 rounded-2xl h-16 border-2 hover:bg-red-50 hover:text-red-600 transition-all"
               >
-                <Heart className="h-6 w-6 transition-transform group-hover:scale-125" />
-                Me gusta
+                <Heart className="h-6 w-6" />
               </Button>
               <Button
                 variant="outline"
@@ -118,11 +112,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
               </Button>
             </div>
           </div>
-
-          <p className="text-center text-xs text-muted-foreground">
-            Al contactar, hablas directamente con los creadores de esta
-            iniciativa.
-          </p>
         </div>
       </div>
     </main>
