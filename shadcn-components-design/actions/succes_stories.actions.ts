@@ -1,13 +1,20 @@
-import { API_URL } from "@/const/api";
+import { buildQuery, fetchStrapi } from "@/lib/strapi-client";
 
 export async function getStories() {
   try {
-    const response = await fetch(`${API_URL}/api/iniciatives?populate=*`, {
+    const query = buildQuery({ populate: "*" });
+    const json = await fetchStrapi<unknown[]>("/api/iniciatives", {
+      query,
       cache: "no-store",
     });
 
-    if (!response.ok) {
-      throw new Error("Error al obtener iniciativas");
-    }
-  } catch (error) {}
+    return { success: true, data: json.data };
+  } catch (error) {
+    console.error("Error al obtener historias", error);
+    return {
+      success: false,
+      data: [],
+      error: "No se pudieron cargar las historias",
+    };
+  }
 }

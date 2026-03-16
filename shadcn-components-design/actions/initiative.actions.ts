@@ -1,41 +1,47 @@
 // @/actions/initiative.actions.ts
-import { API_URL } from "@/const/api";
+import { buildQuery, fetchStrapi } from "@/lib/strapi-client";
+
+type InitiativeCategory = { id: number; name: string };
 
 export async function getInitiativeCategories() {
   try {
-    const res = await fetch(
-      `${API_URL}/api/initiatives-categories?fields[0]=name&fields[1]=id`,
-      { next: { revalidate: 3600 } },
+    const query = buildQuery({
+      "fields[0]": "name",
+      "fields[1]": "id",
+    });
+
+    const json = await fetchStrapi<InitiativeCategory[]>(
+      "/api/initiatives-categories",
+      {
+        query,
+        next: { revalidate: 3600 },
+      },
     );
-    if (!res.ok) throw new Error("Error al obtener categorías");
-    const json = await res.json();
-    return { success: true, data: json.data as { id: number; name: string }[] };
+
+    return { success: true, data: json.data };
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener categorías de iniciativas", error);
     return { success: false, data: [] };
   }
 }
 
-export async function getIniciatives(categoryName?: string | null) {
+export async function getInitiatives(categoryName?: string | null) {
   try {
-    const params = new URLSearchParams();
-    params.append("populate", "*");
+    const query = buildQuery({
+      populate: "*",
+      ...(categoryName && categoryName !== "all"
+        ? { "filters[initiatives_categories][name][$eq]": categoryName }
+        : {}),
+    });
 
-    // ✅ Campo correcto: initiatives_categories (plural, array)
-    if (categoryName && categoryName !== "all") {
-      params.append("filters[initiatives_categories][name][$eq]", categoryName);
-    }
-
-    const res = await fetch(`${API_URL}/api/iniciatives?${params.toString()}`, {
+    const json = await fetchStrapi<unknown[]>("/api/iniciatives", {
+      query,
       cache: "no-store",
     });
 
-    if (!res.ok) throw new Error("Error al obtener iniciativas");
-
-    const json = await res.json();
     return { success: true, data: json.data };
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener iniciativas", error);
     return {
       success: false,
       data: [],
@@ -44,19 +50,21 @@ export async function getIniciatives(categoryName?: string | null) {
   }
 }
 
+// Compatibilidad temporal para evitar romper imports existentes
+export const getIniciatives = getInitiatives;
+
 export async function getInitiativeByDocumentId(documentId: string) {
   try {
-    const res = await fetch(
-      `${API_URL}/api/iniciatives/${documentId}?populate=*`,
-      { cache: "no-store" },
-    );
+    const query = buildQuery({ populate: "*" });
 
-    if (!res.ok) throw new Error("Error al obtener la iniciativa");
+    const json = await fetchStrapi<unknown>(`/api/iniciatives/${documentId}`, {
+      query,
+      cache: "no-store",
+    });
 
-    const json = await res.json();
     return { success: true, data: json.data };
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener la iniciativa", error);
     return {
       success: false,
       data: null,
