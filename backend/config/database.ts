@@ -1,21 +1,19 @@
-export default ({ env }) => {
-  const connectionString = env("DATABASE_URL");
-
-  return {
+export default ({ env }) => ({
+  connection: {
+    client: 'postgres',
     connection: {
-      client: "postgres",
-      connection: {
-        connectionString,
-        // Configuración crítica para Railway/Heroku/Render
-        ssl: env.bool("DATABASE_SSL", true) && {
-          rejectUnauthorized: false, 
-        },
+      connectionString: env('DATABASE_URL'),
+      ssl: env.bool('DATABASE_SSL', true) && {
+        rejectUnauthorized: false,
       },
-      pool: {
-        min: env.int("DATABASE_POOL_MIN", 2),
-        max: env.int("DATABASE_POOL_MAX", 10),
-      },
-      acquireConnectionTimeout: env.int("DATABASE_CONNECTION_TIMEOUT", 60000),
     },
-  };
-};
+    // Añadir este bloque ayuda a manejar reintentos en redes inestables de despliegue
+    pool: {
+      min: 2,
+      max: 10,
+      idleTimeoutMillis: 30000,
+      createTimeoutMillis: 30000,
+      acquireTimeoutMillis: 30000,
+    },
+  },
+});
