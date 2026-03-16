@@ -76,3 +76,6 @@ export interface StrapiResponse<T> {
     pagination: StrapiPagination;
   };
 }
+
+
+export type { Initiative, Category, StrapiImage } from "./initiative";

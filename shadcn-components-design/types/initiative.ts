@@ -47,6 +47,12 @@ export interface FoundationRef {
   siglas: string | null;
 }
 
+export interface InitiativeMember {
+  id: number;
+  username?: string;
+  email?: string;
+}
+
 // ─── Initiative ───────────────────────────────────────────────────────────────
 // Campo real en Strapi: initiatives_categories (manyToMany, array)
 // Campo imagen: images (Multiple Media, array)
@@ -65,4 +71,5 @@ export interface Initiative {
   foundation?: FoundationRef;
   initiatives_categories?: Category[]; // manyToMany — siempre array
   images?: StrapiImage[];
+  users_permissions_users?: InitiativeMember[];
 }

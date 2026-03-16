@@ -41,6 +41,7 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
   const categoryName =
     data.initiatives_categories?.[0]?.name || "Sin categoría";
   const memberCount = data.users_permissions_users?.length || 0;
+  const galleryImages = data.images ?? [];
 
   return (
     <main className="min-h-screen bg-background">
@@ -118,10 +119,10 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
             )}
 
             {/* Galería adicional */}
-            {data.images?.length > 1 && (
+            {galleryImages.length > 1 && (
               <FadeUp delay={0.1}>
                 <div className="grid grid-cols-3 gap-3">
-                  {data.images.slice(1, 4).map((img: any, i: number) => (
+                  {galleryImages.slice(1, 4).map((img, i: number) => (
                     <div
                       key={i}
                       className="relative aspect-square rounded-2xl overflow-hidden bg-muted"

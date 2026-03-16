@@ -106,7 +106,7 @@ export default function FoundationDashboard() {
 
       await Promise.all([
         initiativesFetchRef.current(found.documentId),
-        productsFetchRef.current(),
+        productsFetchRef.current(found.documentId),
       ]);
     } catch (err) {
       console.error("Dashboard error:", err);
@@ -295,7 +295,10 @@ export default function FoundationDashboard() {
                     product={prod}
                     deleting={products.deleting === prod.documentId}
                     onEdit={() => products.openEdit(prod)}
-                    onDelete={() => products.remove(prod.documentId)}
+                    onDelete={() =>
+                      foundation &&
+                      products.remove(prod.documentId, foundation.documentId)
+                    }
                   />
                 ))}
               </div>
@@ -328,7 +331,7 @@ export default function FoundationDashboard() {
           saving={products.saving}
           onFormChange={products.setForm}
           onImageChange={products.setImage}
-          onSave={products.save}
+          onSave={() => foundation && products.save(foundation.documentId)}
           onClose={products.close}
         />
       )}

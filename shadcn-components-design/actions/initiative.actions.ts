@@ -1,4 +1,5 @@
 // @/actions/initiative.actions.ts
+import type { Initiative } from "@/types/initiative";
 import { buildQuery, fetchStrapi } from "@/lib/strapi-client";
 
 type InitiativeCategory = { id: number; name: string };
@@ -34,7 +35,7 @@ export async function getInitiatives(categoryName?: string | null) {
         : {}),
     });
 
-    const json = await fetchStrapi<unknown[]>("/api/iniciatives", {
+    const json = await fetchStrapi<Initiative[]>("/api/iniciatives", {
       query,
       cache: "no-store",
     });
@@ -57,7 +58,7 @@ export async function getInitiativeByDocumentId(documentId: string) {
   try {
     const query = buildQuery({ populate: "*" });
 
-    const json = await fetchStrapi<unknown>(`/api/iniciatives/${documentId}`, {
+    const json = await fetchStrapi<Initiative>(`/api/iniciatives/${documentId}`, {
       query,
       cache: "no-store",
     });
