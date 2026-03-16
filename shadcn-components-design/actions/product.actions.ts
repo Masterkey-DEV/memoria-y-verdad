@@ -1,39 +1,46 @@
+import { buildQuery, fetchStrapi } from "@/lib/strapi-client";
 import { Product } from "@/types/product";
 
-const API_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+type ProductCategory = {
+  id: number;
+  name?: string;
+  slug?: string;
+  attributes?: {
+    name?: string;
+    slug?: string;
+  };
+};
+
+type ProductCategoryOption = {
+  id: number;
+  name: string;
+  slug: string;
+};
 
 /**
  * Obtiene las categorías de productos para los filtros locales
  */
 export async function getProductCategories() {
   try {
-    // Usamos fields para no traer datos innecesarios y optimizar la velocidad
-    const query = new URLSearchParams({
+    const query = buildQuery({
       "fields[0]": "name",
       "fields[1]": "slug",
     });
 
-    const res = await fetch(
-      `${API_URL}/api/product-categories?${query.toString()}`,
-      {
-        next: { revalidate: 3600 }, // Cache por 1 hora
-      },
-    );
+    const json = await fetchStrapi<ProductCategory[]>("/api/product-categories", {
+      query,
+      next: { revalidate: 3600 },
+    });
 
-    if (!res.ok) throw new Error("Error al obtener categorías");
-
-    const json = await res.json();
-
-    // Mapeo compatible con Strapi v4 (attributes) y v5 (directo)
-    const data = json.data.map((item: any) => ({
+    const data: ProductCategoryOption[] = json.data.map((item) => ({
       id: item.id,
-      name: item.name || item.attributes?.name,
-      slug: item.slug || item.attributes?.slug,
+      name: item.name || item.attributes?.name || "",
+      slug: item.slug || item.attributes?.slug || "",
     }));
 
     return { success: true, data };
   } catch (error) {
-    console.error("Fetch Categories Error:", error);
+    console.error("Error al obtener categorías de productos", error);
     return {
       success: false,
       data: [],
@@ -47,27 +54,21 @@ export async function getProductCategories() {
  */
 export async function getProducts(categoryName?: string | null) {
   try {
-    const params = new URLSearchParams();
-    params.append("populate", "*");
+    const query = buildQuery({
+      populate: "*",
+      ...(categoryName && categoryName !== "all" && categoryName !== "Todos"
+        ? { "filters[product_categories][name][$eq]": categoryName }
+        : {}),
+    });
 
-    // Ajuste: Si usas slugs en tus botones, es mejor filtrar por [$eq] de slug
-    if (categoryName && categoryName !== "all" && categoryName !== "Todos") {
-      params.append("filters[product_categories][name][$eq]", categoryName);
-    }
-
-    const res = await fetch(`${API_URL}/api/products?${params.toString()}`, {
+    const json = await fetchStrapi<Product[]>("/api/products", {
+      query,
       cache: "no-store",
     });
 
-    if (!res.ok) throw new Error("Error al obtener los productos");
-
-    const json = await res.json();
-
-    // En Strapi v4/v5 los datos vienen en json.data
-    // Si necesitas limpiar los atributos, puedes mapearlos aquí
-    return { success: true, data: json.data as Product[] };
+    return { success: true, data: json.data };
   } catch (error) {
-    console.error("Fetch Products Error:", error);
+    console.error("Error al obtener productos", error);
     return {
       success: false,
       data: [],
@@ -78,25 +79,22 @@ export async function getProducts(categoryName?: string | null) {
 
 export async function getProductBySlug(slug: string) {
   try {
-    const params = new URLSearchParams();
-    params.append("populate", "*");
-    params.append("filters[slug][$eq]", slug);
+    const query = buildQuery({
+      populate: "*",
+      "filters[slug][$eq]": slug,
+    });
 
-    const res = await fetch(`${API_URL}/api/products?${params.toString()}`, {
+    const json = await fetchStrapi<Product[]>("/api/products", {
+      query,
       cache: "no-store",
     });
 
-    if (!res.ok) throw new Error("Error al obtener el producto");
-
-    const json = await res.json();
-
     return {
       success: true,
-      data:
-        json.data && json.data.length > 0 ? (json.data[0] as Product) : null,
+      data: json.data.length > 0 ? json.data[0] : null,
     };
   } catch (error) {
-    console.error("Fetch Product Error:", error);
+    console.error("Error al obtener producto", error);
     return { success: false, data: null, error: "No se encontró el producto" };
   }
 }
