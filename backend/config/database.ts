@@ -1,19 +1,27 @@
-export default ({ env }) => ({
-  connection: {
-    client: 'postgres',
+// backend/config/database.js
+
+export default ({ env }) => {
+  // Extraemos la URL de la base de datos
+  const connectionString = env('DATABASE_URL');
+
+  return {
     connection: {
-      connectionString: env('DATABASE_URL'),
-      ssl: env.bool('DATABASE_SSL', true) && {
-        rejectUnauthorized: false,
+      client: 'postgres',
+      connection: {
+        connectionString,
+        // Configuración de SSL optimizada para Railway
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      },
+      // Configuración de Pool para evitar cierres inesperados por latencia
+      pool: {
+        min: env.int('DATABASE_POOL_MIN', 2),
+        max: env.int('DATABASE_POOL_MAX', 10),
+        acquireTimeoutMillis: 60000, // 60 segundos para esperar conexión
+        createTimeoutMillis: 30000,
+        idleTimeoutMillis: 30000,
       },
     },
-    // Añadir este bloque ayuda a manejar reintentos en redes inestables de despliegue
-    pool: {
-      min: 2,
-      max: 10,
-      idleTimeoutMillis: 30000,
-      createTimeoutMillis: 30000,
-      acquireTimeoutMillis: 30000,
-    },
-  },
-});
+  };
+};
