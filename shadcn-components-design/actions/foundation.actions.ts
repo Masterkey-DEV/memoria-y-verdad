@@ -1,6 +1,5 @@
 // @/actions/foundation.actions.ts
-
-const API_URL = process.env.NEXT_PUBLIC_STRAPI_URL || "http://localhost:1337";
+import { API_URL } from "@/const/api";
 
 export async function getFoundations() {
   try {
