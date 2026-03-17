@@ -1,26 +1,29 @@
-// backend/config/database.js
-
 export default ({ env }) => {
-  // Extraemos la URL de la base de datos
-  const connectionString = env('DATABASE_URL');
+  const databaseUrl = env("DATABASE_URL");
 
-  return {
-    connection: {
-      client: 'postgres',
-      connection: {
-        connectionString,
-        // Configuración de SSL optimizada para Railway
+  const connection = databaseUrl
+    ? {
+        connectionString: databaseUrl,
         ssl: {
           rejectUnauthorized: false,
         },
-      },
-      // Configuración de Pool para evitar cierres inesperados por latencia
+      }
+    : {
+        host: env("DATABASE_HOST", "localhost"),
+        port: env.int("DATABASE_PORT", 5432),
+        database: env("DATABASE_NAME", "ventana_social"),
+        user: env("DATABASE_USERNAME", "ventana_user"),
+        password: env("DATABASE_PASSWORD", "ventana_password"),
+        ssl: env.bool("DATABASE_SSL", false),
+      };
+
+  return {
+    connection: {
+      client: "postgres",
+      connection,
       pool: {
-        min: env.int('DATABASE_POOL_MIN', 2),
-        max: env.int('DATABASE_POOL_MAX', 10),
-        acquireTimeoutMillis: 60000, // 60 segundos para esperar conexión
-        createTimeoutMillis: 30000,
-        idleTimeoutMillis: 30000,
+        min: env.int("DATABASE_POOL_MIN", 2),
+        max: env.int("DATABASE_POOL_MAX", 10),
       },
     },
   };
