@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { getIniciatives } from "@/actions/initiative.actions";
 import { InitiativeCard } from "@/components/initiative-card";
+import { getMediaUrl } from "@/lib/media";
 import { useCategoryStore } from "@/store/useCategoryStore";
 import { API_URL } from "@/const/api";
 import { Lightbulb, Loader2 } from "lucide-react";
@@ -67,9 +68,7 @@ export function InitiativesSection() {
       {initiatives.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {initiatives.map((initiative) => {
-            const imageUrl = initiative.images?.[0]?.url
-              ? `${API_URL}${initiative.images[0].url}`
-              : "/placeholder.jpg";
+            const imageUrl = getMediaUrl(initiative.images?.[0]?.url);
 
             const categoryName = initiative.initiatives_categories?.[0]?.name;
 

@@ -24,8 +24,8 @@ export interface Initiative {
     siglas: string | null;
   };
   initiatives_categories?: Category[];
-  // ✅ Strapi devuelve "usuario" en este proyecto (manyToMany con User)
-  usuario?: {
+  // ✅ Campo real en Strapi: "users" (Relation manyToMany with User)
+  users?: {
     id: number;
     documentId: string;
     username: string;

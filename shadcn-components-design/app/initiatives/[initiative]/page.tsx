@@ -5,8 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { FadeUp } from "@/components/motion-wrapper";
 import { getInitiativeByDocumentId } from "@/actions/initiative.actions";
 import { JoinInitiativeButton } from "@/components/JoinInitiativeButton";
+import { MemberCount, MemberCountCard } from "@/components/MemberCount";
 import { getMediaUrl } from "@/lib/media";
-import { ArrowLeft, Building2, Lightbulb, ArrowUpRight, Users } from "lucide-react";
+import { ArrowLeft, Building2, Lightbulb, ArrowUpRight } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ initiative: string }>;
@@ -30,9 +31,6 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
   const data = result.data;
   const imageUrl = getMediaUrl(data.images?.[0]?.url);
   const categoryName = data.initiatives_categories?.[0]?.name || "Sin categoría";
-  // ✅ FIX: campo es "usuario" (no "users"), ?? 0 evita undefined
-  const memberCount = data.usuario?.length ?? 0;
-  // ✅ FIX: evita comparar undefined > 1
   const hasExtraImages = (data.images?.length ?? 0) > 1;
 
   return (
@@ -44,17 +42,17 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
           <div className="max-w-7xl mx-auto w-full px-6 pb-16 text-white space-y-5">
             <FadeUp>
               <div className="flex items-center gap-3">
-                <Badge className="bg-primary text-primary-foreground uppercase tracking-widest text-[10px]">{categoryName}</Badge>
-                {memberCount > 0 && (
-                  <span className="flex items-center gap-1.5 text-white/60 text-xs font-medium">
-                    <Users className="h-3.5 w-3.5" />
-                    {memberCount} {memberCount === 1 ? "miembro" : "miembros"}
-                  </span>
-                )}
+                <Badge className="bg-primary text-primary-foreground uppercase tracking-widest text-[10px]">
+                  {categoryName}
+                </Badge>
+                {/* ✅ Siempre visible, se hidrata con datos reales del cliente */}
+                <MemberCount initiativeId={data.documentId} />
               </div>
             </FadeUp>
             <FadeUp delay={0.1}>
-              <h1 className="text-4xl md:text-6xl font-black tracking-tight max-w-3xl leading-[1.05]">{data.title}</h1>
+              <h1 className="text-4xl md:text-6xl font-black tracking-tight max-w-3xl leading-[1.05]">
+                {data.title}
+              </h1>
             </FadeUp>
             <FadeUp delay={0.2}>
               <p className="text-lg max-w-2xl text-white/70 leading-relaxed">{data.objective}</p>
@@ -65,7 +63,10 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
 
       <div className="border-b border-border/50">
         <div className="max-w-6xl mx-auto px-6 py-4">
-          <Link href="/initiatives" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group">
+          <Link
+            href="/initiatives"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
+          >
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             Volver a iniciativas
           </Link>
@@ -84,17 +85,24 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
                     </div>
                     Sobre esta iniciativa
                   </h2>
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-base">{data.description}</p>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-line text-base">
+                    {data.description}
+                  </p>
                 </div>
               </FadeUp>
             )}
-            {/* ✅ FIX: usa hasExtraImages en lugar de data.images?.length > 1 */}
             {hasExtraImages && (
               <FadeUp delay={0.1}>
                 <div className="grid grid-cols-3 gap-3">
-                  {data.images!.slice(1, 4).map((img:{ url: string }, i:number) => (
+                  {data.images!.slice(1, 4).map((img: { url: string }, i: number) => (
                     <div key={i} className="relative aspect-square rounded-2xl overflow-hidden bg-muted">
-                      <Image src={getMediaUrl(img.url)} alt="" fill className="object-cover" sizes="(max-width: 768px) 33vw, 200px" />
+                      <Image
+                        src={getMediaUrl(img.url)}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 33vw, 200px"
+                      />
                     </div>
                   ))}
                 </div>
@@ -110,34 +118,31 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
                   Organización
                 </h3>
                 {data.foundation?.siglas ? (
-                  <Link href={`/foundations/${data.foundation.siglas}`} className="flex items-center justify-between group">
+                  <Link
+                    href={`/foundations/${data.foundation.siglas}`}
+                    className="flex items-center justify-between group"
+                  >
                     <span className="font-bold text-foreground group-hover:text-primary transition-colors">
                       {data.foundation.name || "Organización Aliada"}
                     </span>
                     <ArrowUpRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all" />
                   </Link>
                 ) : (
-                  <p className="font-medium text-foreground">{data.foundation?.name || "Organización Aliada"}</p>
+                  <p className="font-medium text-foreground">
+                    {data.foundation?.name || "Organización Aliada"}
+                  </p>
                 )}
               </div>
             </FadeUp>
 
             <FadeUp delay={0.15}>
-              <div className="p-6 rounded-3xl border bg-muted/30 space-y-3">
-                <h3 className="text-sm font-bold flex items-center gap-2 text-muted-foreground uppercase tracking-wider">
-                  <Users className="h-4 w-4" />
-                  Comunidad
-                </h3>
-                <p className="text-3xl font-black text-foreground">{memberCount}</p>
-                <p className="text-xs text-muted-foreground">
-                  {memberCount === 1 ? "persona unida" : "personas unidas"} a esta iniciativa
-                </p>
-              </div>
+              {/* ✅ Card de comunidad — datos reales sin importar si hay sesión */}
+              <MemberCountCard initiativeId={data.documentId} />
             </FadeUp>
 
             <FadeUp delay={0.2}>
               <div className="p-6 rounded-3xl border bg-card space-y-4">
-                <JoinInitiativeButton initiativeId={data.documentId} initialMembers={data.usuario || []} />
+                <JoinInitiativeButton initiativeId={data.documentId} />
                 <p className="text-center text-xs text-muted-foreground leading-relaxed">
                   Al unirte, formas parte activa de esta iniciativa y sus actividades.
                 </p>

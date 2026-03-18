@@ -46,9 +46,18 @@ export async function getIniciatives(categoryName?: string | null) {
 
 export async function getInitiativeByDocumentId(documentId: string) {
   try {
+    // populate=* en Strapi 5 NO popula users (relación a plugin::users-permissions.user)
+    // Hay que pedirlo explícitamente con populate[users][fields]
+    const params = new URLSearchParams({
+      "populate[users][fields][0]": "id",        // solo IDs, no datos sensibles
+      "populate[foundation][populate]": "*",
+      "populate[initiatives_categories][fields][0]": "name",
+      "populate[images][fields][0]": "url",
+    });
+
     const res = await fetch(
-      `${API_URL}/api/iniciatives/${documentId}?populate=*`,
-      { cache: "no-store" },
+      `${API_URL}/api/iniciatives/${documentId}?${params.toString()}`,
+      { cache: "no-store" }
     );
 
     if (!res.ok) throw new Error("Error al obtener la iniciativa");
@@ -57,10 +66,6 @@ export async function getInitiativeByDocumentId(documentId: string) {
     return { success: true, data: json.data };
   } catch (error) {
     console.error(error);
-    return {
-      success: false,
-      data: null,
-      error: "No se encontró la iniciativa",
-    };
+    return { success: false, data: null, error: "No se encontró la iniciativa" };
   }
 }

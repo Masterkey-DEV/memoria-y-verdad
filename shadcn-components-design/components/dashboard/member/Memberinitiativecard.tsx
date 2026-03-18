@@ -42,7 +42,7 @@ export function MemberInitiativeCard({
           )}
           <span className="flex items-center gap-1">
             <Users className="h-3 w-3" />
-            {init.usuario?.length ?? 0} miembros
+            {init.users?.length ?? 0} miembros
           </span>
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />

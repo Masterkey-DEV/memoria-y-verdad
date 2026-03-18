@@ -123,7 +123,8 @@ export default async function FoundationDetailPage({ params }: Props) {
             {initiatives.map((initiative) => {
               const initImgUrl = getMediaUrl(initiative.images?.[0]?.url);
               const categoryName = initiative.initiatives_categories?.[0]?.name;
-              const memberCount = initiative.usuario?.length ?? 0;
+              // ✅ campo correcto: "users"
+              const memberCount = initiative.users?.length ?? 0;
 
               return (
                 <Link key={initiative.id} href={`/initiatives/${initiative.documentId}`} className="group block">
