@@ -1,6 +1,6 @@
 // @/app/fundaciones/page.tsx
 import { getFoundations } from "@/actions/foundation.actions";
-import { API_URL } from "@/const/api";
+import { getMediaUrl } from "@/lib/media";
 import Image from "next/image";
 import Link from "next/link";
 import { Building2, MapPin, ArrowRight } from "lucide-react";
@@ -43,22 +43,20 @@ export default async function FoundationsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {(foundations as any[]).map((foundation) => (
             <Link
-              href={`/foundations/${foundation.siglas}`} // ✅ campo correcto
+              href={`/foundations/${foundation.siglas}`}
               key={foundation.id}
               className="group relative flex flex-col bg-card border border-border/50 rounded-[2.5rem] overflow-hidden transition-all hover:shadow-2xl hover:border-primary/20 hover:-translate-y-2"
             >
-              {/* Logo y Encabezado de la Tarjeta */}
+              {/* Logo */}
               <div className="p-8 flex items-center gap-6 border-b border-border/40 bg-muted/20">
                 <div className="relative h-20 w-20 rounded-2xl overflow-hidden border-2 border-background bg-white shadow-sm shrink-0">
+                  {/* ✅ FIX: getMediaUrl maneja Cloudinary (absoluta) y local (relativa) */}
                   <Image
-                    src={
-                      foundation.image?.url // ✅ campo correcto
-                        ? `${API_URL}${foundation.image.url}`
-                        : "/placeholder-logo.jpg"
-                    }
+                    src={getMediaUrl(foundation.image?.url, "/placeholder-logo.jpg")}
                     alt={foundation.name}
                     fill
                     className="object-contain p-2"
+                    sizes="80px"
                   />
                 </div>
                 <div>
@@ -72,13 +70,12 @@ export default async function FoundationsPage() {
                 </div>
               </div>
 
-              {/* Descripción Breve */}
+              {/* Descripción */}
               <div className="p-8 flex flex-col flex-grow">
                 <p className="text-muted-foreground text-sm line-clamp-3 leading-relaxed mb-6">
                   {foundation.description ||
                     "Esta organización trabaja activamente en proyectos de impacto social y reconstrucción del tejido comunitario."}
                 </p>
-
                 <div className="mt-auto flex items-center justify-between">
                   <span className="text-xs font-black uppercase tracking-widest text-primary/60 flex items-center gap-1">
                     Ver Perfil <ArrowRight className="h-3 w-3" />
@@ -92,27 +89,21 @@ export default async function FoundationsPage() {
           ))}
         </div>
 
-        {/* Estado Vacío */}
         {foundations.length === 0 && (
           <div className="text-center py-32 border-2 border-dashed rounded-[3rem] bg-muted/10">
             <Building2 className="mx-auto h-16 w-16 text-muted-foreground/20 mb-4" />
-            <h3 className="text-xl font-bold">
-              Aún no hay fundaciones registradas
-            </h3>
-            <p className="text-muted-foreground">
-              Estamos construyendo nuestra red de aliados.
-            </p>
+            <h3 className="text-xl font-bold">Aún no hay fundaciones registradas</h3>
+            <p className="text-muted-foreground">Estamos construyendo nuestra red de aliados.</p>
           </div>
         )}
       </section>
 
-      {/* Sección CTA para nuevas fundaciones */}
+      {/* CTA */}
       <section className="max-w-7xl mx-auto px-4 pb-24">
         <div className="bg-foreground text-background rounded-[3rem] p-12 md:p-20 text-center space-y-8 relative overflow-hidden">
           <div className="relative z-10 space-y-4">
             <h2 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter">
-              ¿Eres parte de una <span className="text-primary">Fundación</span>
-              ?
+              ¿Eres parte de una <span className="text-primary">Fundación</span>?
             </h2>
             <p className="max-w-xl mx-auto text-background/60 text-lg">
               Únete a nuestra red para potenciar iniciativas de reconciliación y
@@ -126,8 +117,7 @@ export default async function FoundationsPage() {
               </Link>
             </div>
           </div>
-          {/* Decoración geométrica */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
         </div>
       </section>
     </main>

@@ -3,7 +3,9 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { API_URL } from "@/const/api";
+import { getMediaUrl } from "@/lib/media";
 import { useAuth } from "@/context/AuthContext";
 import {
   Package,
@@ -103,17 +105,12 @@ export default function EntrepreneurDashboard() {
     if (!jwt || !user?.id) return;
     setDataLoading(true);
     try {
-      // CAMBIO CLAVE: Usar 'usuario' en lugar de 'owner'
       const query = `filters[usuario][id][$eq]=${user.id}&populate=images`;
-
       const res = await fetch(`${API_URL}/api/products?${query}`, {
         headers: { Authorization: `Bearer ${jwt}` },
       });
-
       const data = await res.json();
-
       if (!res.ok) throw new Error("Error en la respuesta de Strapi");
-
       setProducts(data.data || []);
     } catch (error) {
       console.error("Error cargando productos:", error);
@@ -148,12 +145,11 @@ export default function EntrepreneurDashboard() {
   }
 
   async function handleSave() {
-    if (!jwt || !user?.id) return; // Necesitamos el ID del usuario
+    if (!jwt || !user?.id) return;
     setSaving(true);
     try {
       let imageId: number | undefined;
 
-      // Lógica de subida de imagen (se mantiene igual)
       if (imageFile) {
         const fd = new FormData();
         fd.append("files", imageFile);
@@ -168,7 +164,6 @@ export default function EntrepreneurDashboard() {
         }
       }
 
-      // CAMBIO 2: Incluir el 'owner' en el payload
       const payload = {
         name: form.name,
         slug: form.slug || autoSlug(form.name),
@@ -177,7 +172,6 @@ export default function EntrepreneurDashboard() {
         price: parseFloat(form.price) || 0,
         stock: parseInt(form.stock) || 0,
         featured: form.featured,
-        // CAMBIO: Aquí también usamos el nombre técnico de la relación
         usuario: user.id,
         ...(imageId ? { images: [imageId] } : {}),
       };
@@ -194,7 +188,6 @@ export default function EntrepreneurDashboard() {
         if (!res.ok) throw new Error("Error al crear");
         toast({ title: "¡Producto creado! 🚀" });
       } else if (modal === "edit" && editTarget) {
-        // CAMBIO 3: Usar el documentId para el PUT
         const res = await fetch(
           `${API_URL}/api/products/${editTarget.documentId}`,
           {
@@ -285,28 +278,16 @@ export default function EntrepreneurDashboard() {
 
         <div className="grid grid-cols-3 gap-4">
           <div className="bg-card border border-border rounded-2xl p-5">
-            <p className="text-3xl font-black text-primary">
-              {products.length}
-            </p>
-            <p className="text-xs text-muted-foreground font-medium mt-1">
-              Productos
-            </p>
+            <p className="text-3xl font-black text-primary">{products.length}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">Productos</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-5">
-            <p className="text-3xl font-black">
-              {products.filter((p) => p.featured).length}
-            </p>
-            <p className="text-xs text-muted-foreground font-medium mt-1">
-              Destacados
-            </p>
+            <p className="text-3xl font-black">{products.filter((p) => p.featured).length}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">Destacados</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-5">
-            <p className="text-3xl font-black">
-              {products.reduce((a, p) => a + (p.stock ?? 0), 0)}
-            </p>
-            <p className="text-xs text-muted-foreground font-medium mt-1">
-              Stock total
-            </p>
+            <p className="text-3xl font-black">{products.reduce((a, p) => a + (p.stock ?? 0), 0)}</p>
+            <p className="text-xs text-muted-foreground font-medium mt-1">Stock total</p>
           </div>
         </div>
 
@@ -321,10 +302,7 @@ export default function EntrepreneurDashboard() {
                   Crea tu primer producto para aparecer en el catálogo
                 </p>
               </div>
-              <Button
-                onClick={openCreate}
-                className="rounded-xl gap-2 font-bold mt-2"
-              >
+              <Button onClick={openCreate} className="rounded-xl gap-2 font-bold mt-2">
                 <Plus className="h-4 w-4" />
                 Crear producto
               </Button>
@@ -337,12 +315,15 @@ export default function EntrepreneurDashboard() {
                   className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between gap-4 group hover:border-primary/20 transition-colors"
                 >
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className="h-14 w-14 rounded-xl bg-muted overflow-hidden shrink-0">
+                    {/* ✅ FIX: usa getMediaUrl para soportar Cloudinary y local */}
+                    <div className="h-14 w-14 rounded-xl bg-muted overflow-hidden shrink-0 relative">
                       {prod.images?.[0] ? (
-                        <img
-                          src={`${API_URL}${prod.images[0].url}`}
+                        <Image
+                          src={getMediaUrl(prod.images[0].url)}
                           alt={prod.name}
-                          className="h-full w-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="56px"
                         />
                       ) : (
                         <div className="h-full w-full flex items-center justify-center">
@@ -354,27 +335,18 @@ export default function EntrepreneurDashboard() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-black truncate">{prod.name}</h3>
                         {prod.featured && (
-                          <Badge className="rounded-full text-[10px] px-2">
-                            Destacado
-                          </Badge>
+                          <Badge className="rounded-full text-[10px] px-2">Destacado</Badge>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-1">
-                        {prod.shortDescription}
-                      </p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">{prod.shortDescription}</p>
                       <p className="text-xs font-bold text-primary">
-                        ${prod.price?.toLocaleString("es-CO")} · {prod.stock} en
-                        stock
+                        ${prod.price?.toLocaleString("es-CO")} · {prod.stock} en stock
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <Link href={`/products/${prod.slug}`}>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="rounded-xl h-9 w-9"
-                      >
+                      <Button variant="ghost" size="icon" className="rounded-xl h-9 w-9">
                         <Eye className="h-4 w-4" />
                       </Button>
                     </Link>
@@ -414,12 +386,7 @@ export default function EntrepreneurDashboard() {
               <h2 className="font-black text-xl">
                 {modal === "create" ? "Nuevo producto" : "Editar producto"}
               </h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-xl"
-                onClick={closeModal}
-              >
+              <Button variant="ghost" size="icon" className="rounded-xl" onClick={closeModal}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -428,11 +395,7 @@ export default function EntrepreneurDashboard() {
                 <input
                   value={form.name}
                   onChange={(e) =>
-                    setForm({
-                      ...form,
-                      name: e.target.value,
-                      slug: autoSlug(e.target.value),
-                    })
+                    setForm({ ...form, name: e.target.value, slug: autoSlug(e.target.value) })
                   }
                   placeholder="Producto artesanal"
                   className={inputCls}
@@ -449,9 +412,7 @@ export default function EntrepreneurDashboard() {
               <Field label="Descripción corta">
                 <input
                   value={form.shortDescription}
-                  onChange={(e) =>
-                    setForm({ ...form, shortDescription: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
                   placeholder="Breve descripción visible en el catálogo"
                   className={inputCls}
                 />
@@ -459,9 +420,7 @@ export default function EntrepreneurDashboard() {
               <Field label="Descripción completa">
                 <textarea
                   value={form.description}
-                  onChange={(e) =>
-                    setForm({ ...form, description: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={3}
                   placeholder="Describe tu producto en detalle..."
                   className={cn(inputCls, "resize-none")}
@@ -472,9 +431,7 @@ export default function EntrepreneurDashboard() {
                   <input
                     type="number"
                     value={form.price}
-                    onChange={(e) =>
-                      setForm({ ...form, price: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, price: e.target.value })}
                     placeholder="25000"
                     className={inputCls}
                   />
@@ -483,9 +440,7 @@ export default function EntrepreneurDashboard() {
                   <input
                     type="number"
                     value={form.stock}
-                    onChange={(e) =>
-                      setForm({ ...form, stock: e.target.value })
-                    }
+                    onChange={(e) => setForm({ ...form, stock: e.target.value })}
                     placeholder="10"
                     className={inputCls}
                   />
@@ -495,9 +450,7 @@ export default function EntrepreneurDashboard() {
                 <label
                   className={cn(
                     "flex items-center gap-3 cursor-pointer border border-dashed rounded-xl px-4 py-3 hover:border-primary/50 hover:bg-primary/5 transition-all group",
-                    imageFile
-                      ? "border-primary/40 bg-primary/5"
-                      : "border-input",
+                    imageFile ? "border-primary/40 bg-primary/5" : "border-input",
                   )}
                 >
                   {imageFile ? (
@@ -531,17 +484,11 @@ export default function EntrepreneurDashboard() {
                     )}
                   />
                 </div>
-                <span className="text-sm font-semibold">
-                  Marcar como destacado
-                </span>
+                <span className="text-sm font-semibold">Marcar como destacado</span>
               </label>
             </div>
             <div className="flex gap-3 p-6 border-t border-border">
-              <Button
-                variant="outline"
-                className="flex-1 rounded-xl"
-                onClick={closeModal}
-              >
+              <Button variant="outline" className="flex-1 rounded-xl" onClick={closeModal}>
                 Cancelar
               </Button>
               <Button

@@ -1,5 +1,5 @@
 import { getProductBySlug } from "@/actions/product.actions";
-import { API_URL } from "@/const/api";
+import { getMediaUrl } from "@/lib/media";
 import { Product } from "@/types/product";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -21,9 +21,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
   }
 
   const product: Product = result.data;
-  const imageUrl = product.images?.[0]?.url
-    ? `${API_URL}${product.images[0].url}`
-    : "/placeholder.jpg";
+
+  // ✅ FIX: getMediaUrl detecta si es Cloudinary (absoluta) o local (relativa)
+  const imageUrl = getMediaUrl(product.images?.[0]?.url);
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8 md:py-16">
@@ -45,6 +45,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               fill
               className="object-cover"
               priority
+              sizes="(max-width: 1024px) 100vw, 58vw"
             />
             {product.featured && (
               <Badge className="absolute top-6 left-6 bg-primary text-primary-foreground px-4 py-1 rounded-full">
@@ -96,7 +97,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
               <MessageCircle className="h-6 w-6" />
               Apoyar Proyecto
             </Button>
-
             <div className="flex gap-4">
               <Button
                 variant="outline"

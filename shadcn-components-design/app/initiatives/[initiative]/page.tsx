@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { FadeUp } from "@/components/motion-wrapper";
 import { getInitiativeByDocumentId } from "@/actions/initiative.actions";
 import { JoinInitiativeButton } from "@/components/JoinInitiativeButton";
-import { API_URL } from "@/const/api";
+import { getMediaUrl } from "@/lib/media";
 import {
   ArrowLeft,
   Building2,
@@ -35,11 +35,10 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
   if (!result.success || !result.data) notFound();
 
   const data = result.data;
-  const imageUrl = data.images?.[0]?.url
-    ? `${API_URL}${data.images[0].url}`
-    : "/placeholder.jpg";
-  const categoryName =
-    data.initiatives_categories?.[0]?.name || "Sin categoría";
+
+  // ✅ FIX: getMediaUrl resuelve Cloudinary y almacenamiento local automáticamente
+  const imageUrl = getMediaUrl(data.images?.[0]?.url);
+  const categoryName = data.initiatives_categories?.[0]?.name || "Sin categoría";
   const memberCount = data.usuario?.length || 0;
 
   return (
@@ -52,6 +51,7 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
           fill
           className="object-cover scale-105 blur-[1px]"
           priority
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/10" />
         <div className="absolute inset-0 flex items-end">
@@ -117,7 +117,7 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
               </FadeUp>
             )}
 
-            {/* Galería adicional */}
+            {/* ✅ FIX: galería adicional con getMediaUrl */}
             {data.images?.length > 1 && (
               <FadeUp delay={0.1}>
                 <div className="grid grid-cols-3 gap-3">
@@ -127,10 +127,11 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
                       className="relative aspect-square rounded-2xl overflow-hidden bg-muted"
                     >
                       <Image
-                        src={`${API_URL}${img.url}`}
+                        src={getMediaUrl(img.url)}
                         alt=""
                         fill
                         className="object-cover"
+                        sizes="(max-width: 768px) 33vw, 200px"
                       />
                     </div>
                   ))}
@@ -141,7 +142,6 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
 
           {/* SIDEBAR */}
           <aside className="space-y-5">
-            {/* Fundación */}
             <FadeUp delay={0.1}>
               <div className="p-6 rounded-3xl border bg-muted/30 space-y-4">
                 <h3 className="text-sm font-bold flex items-center gap-2 text-muted-foreground uppercase tracking-wider">
@@ -166,24 +166,19 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
               </div>
             </FadeUp>
 
-            {/* Miembros */}
             <FadeUp delay={0.15}>
               <div className="p-6 rounded-3xl border bg-muted/30 space-y-3">
                 <h3 className="text-sm font-bold flex items-center gap-2 text-muted-foreground uppercase tracking-wider">
                   <Users className="h-4 w-4" />
                   Comunidad
                 </h3>
-                <p className="text-3xl font-black text-foreground">
-                  {memberCount}
-                </p>
+                <p className="text-3xl font-black text-foreground">{memberCount}</p>
                 <p className="text-xs text-muted-foreground">
-                  {memberCount === 1 ? "persona unida" : "personas unidas"} a
-                  esta iniciativa
+                  {memberCount === 1 ? "persona unida" : "personas unidas"} a esta iniciativa
                 </p>
               </div>
             </FadeUp>
 
-            {/* CTA - Join button */}
             <FadeUp delay={0.2}>
               <div className="p-6 rounded-3xl border bg-card space-y-4">
                 <JoinInitiativeButton
@@ -191,8 +186,7 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
                   initialMembers={data.usuario || []}
                 />
                 <p className="text-center text-xs text-muted-foreground leading-relaxed">
-                  Al unirte, formas parte activa de esta iniciativa y sus
-                  actividades.
+                  Al unirte, formas parte activa de esta iniciativa y sus actividades.
                 </p>
               </div>
             </FadeUp>

@@ -3,7 +3,7 @@ import {
   getIniciatives,
   getInitiativeCategories,
 } from "@/actions/initiative.actions";
-import { API_URL } from "@/const/api";
+import { getMediaUrl } from "@/lib/media";
 import { InitiativeCard } from "@/components/initiative-card";
 import { Badge } from "@/components/ui/badge";
 import { Lightbulb } from "lucide-react";
@@ -100,11 +100,8 @@ export default async function InitiativesPage({ searchParams }: PageProps) {
         {(initiatives as any[]).length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {(initiatives as any[]).map((initiative) => {
-              const imageUrl = initiative.images?.[0]?.url
-                ? `${API_URL}${initiative.images[0].url}`
-                : "/placeholder.jpg";
-
-              // ✅ initiatives_categories es un array
+              // ✅ FIX: getMediaUrl resuelve Cloudinary y local sin doble prefijo
+              const imageUrl = getMediaUrl(initiative.images?.[0]?.url);
               const categoryName = initiative.initiatives_categories?.[0]?.name;
 
               return (
@@ -112,9 +109,7 @@ export default async function InitiativesPage({ searchParams }: PageProps) {
                   key={initiative.id}
                   documentId={initiative.documentId}
                   title={initiative.title}
-                  organization={
-                    initiative.foundation?.name || "Organización Aliada"
-                  }
+                  organization={initiative.foundation?.name || "Organización Aliada"}
                   description={initiative.objective}
                   imageSrc={imageUrl}
                   imageAlt={`Imagen de ${initiative.title}`}
