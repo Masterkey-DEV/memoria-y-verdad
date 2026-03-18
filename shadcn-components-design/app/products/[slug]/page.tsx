@@ -1,6 +1,6 @@
 import { getProductBySlug } from "@/actions/product.actions";
 import { getMediaUrl } from "@/lib/media";
-import { Product } from "@/types/product";
+import type { Product } from "@/types/product";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Heart, MessageCircle, Share2 } from "lucide-react";
@@ -16,14 +16,14 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const result = await getProductBySlug(slug);
 
-  if (!result.success || !result.data) {
-    notFound();
-  }
+  if (!result.success || !result.data) notFound();
 
   const product: Product = result.data;
-
-  // ✅ FIX: getMediaUrl detecta si es Cloudinary (absoluta) o local (relativa)
   const imageUrl = getMediaUrl(product.images?.[0]?.url);
+
+  // ✅ FIX: price y stock son nullable en el tipo — usar ?? 0 para operaciones
+  const price = product.price ?? 0;
+  const stock = product.stock ?? 0;
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8 md:py-16">
@@ -67,30 +67,37 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
               {product.name}
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed italic border-l-4 pl-4 border-primary/20">
-              "{product.shortDescription}"
-            </p>
+            {/* ✅ FIX: shortDescription nullable — solo renderizar si existe */}
+            {product.shortDescription && (
+              <p className="text-xl text-muted-foreground leading-relaxed italic border-l-4 pl-4 border-primary/20">
+                "{product.shortDescription}"
+              </p>
+            )}
           </div>
 
           <div className="flex items-baseline gap-4">
+            {/* ✅ FIX: price con ?? 0, nunca llama .toLocaleString() en null */}
             <span className="text-4xl font-bold text-primary">
-              ${product.price.toLocaleString("es-CO")}
+              ${price.toLocaleString("es-CO")}
             </span>
-            {product.stock > 0 && (
+            {stock > 0 && (
               <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                {product.stock} disponibles
+                {stock} disponibles
               </span>
             )}
           </div>
 
-          <div className="prose prose-gray py-6 border-y border-border/60">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
-              Historia del producto
-            </h3>
-            <p className="text-foreground/80 leading-relaxed text-lg">
-              {product.description}
-            </p>
-          </div>
+          {/* ✅ FIX: description nullable — solo renderizar si existe */}
+          {product.description && (
+            <div className="prose prose-gray py-6 border-y border-border/60">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                Historia del producto
+              </h3>
+              <p className="text-foreground/80 leading-relaxed text-lg">
+                {product.description}
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
             <Button className="rounded-2xl h-16 text-lg font-bold gap-3 shadow-xl shadow-green-500/20 bg-green-600 hover:bg-green-700">
@@ -98,16 +105,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
               Apoyar Proyecto
             </Button>
             <div className="flex gap-4">
-              <Button
-                variant="outline"
-                className="flex-1 rounded-2xl h-16 border-2 hover:bg-red-50 hover:text-red-600 transition-all"
-              >
+              <Button variant="outline" className="flex-1 rounded-2xl h-16 border-2 hover:bg-red-50 hover:text-red-600 transition-all">
                 <Heart className="h-6 w-6" />
               </Button>
-              <Button
-                variant="outline"
-                className="aspect-square p-0 rounded-2xl h-16 border-2"
-              >
+              <Button variant="outline" className="aspect-square p-0 rounded-2xl h-16 border-2">
                 <Share2 className="h-5 w-5" />
               </Button>
             </div>

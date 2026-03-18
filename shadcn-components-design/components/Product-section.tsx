@@ -98,10 +98,10 @@ export function ProductsSection() {
               <ProductCard
                 key={product.id}
                 name={product.name}
-                price={product.price}
+                price={product.price ?? 0}
                 category={product.product_categories?.[0]?.name}
                 imageSrc={imageUrl}
-                shortDescription={product.shortDescription}
+                shortDescription={product.shortDescription ?? "" }
                 href={`/products/${product.slug || product.id}`}
               />
             );

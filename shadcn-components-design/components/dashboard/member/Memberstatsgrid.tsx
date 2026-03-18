@@ -1,4 +1,4 @@
-import type { Initiative } from "@/types/member";
+import type { Initiative } from "@/types/initiative";
 
 interface MemberStatsGridProps {
   initiatives: Initiative[];

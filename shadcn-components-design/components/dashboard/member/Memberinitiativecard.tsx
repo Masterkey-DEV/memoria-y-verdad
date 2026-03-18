@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Building2, Users, Calendar, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { Initiative } from "@/types/member";
+import type { Initiative } from "@/types/initiative";
 
 interface MemberInitiativeCardProps {
   initiative: Initiative;

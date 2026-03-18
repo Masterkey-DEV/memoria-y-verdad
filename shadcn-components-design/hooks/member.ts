@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { API_URL } from "@/const/api";
-import type { Initiative } from "@/types/member";
+import type { Initiative } from "@/types/initiative";
 
 export function useMemberInitiatives(jwt: string | null) {
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);

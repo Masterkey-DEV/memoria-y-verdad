@@ -1,6 +1,7 @@
 import { Lightbulb, Package, Users, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Foundation, Initiative, Product } from "@/types/dashboard";
+import type { Foundation, Product } from "@/types/dashboard";
+import { Initiative } from "@/types/initiative";
 
 interface StatsGridProps {
   foundation: Foundation | null;

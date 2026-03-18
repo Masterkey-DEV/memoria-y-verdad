@@ -1,5 +1,5 @@
 "use client";
-
+import { getMediaUrl } from "@/lib/media";
 import Link from "next/link";
 import Image from "next/image";
 import { Foundation } from "@/types/foundation";
@@ -11,9 +11,7 @@ interface Props {
 }
 
 export function FoundationCard({ foundation }: Props) {
-  const imageUrl = foundation.image?.url
-    ? `${API_URL}${foundation.image.url}`
-    : "/placeholder.jpg";
+  const imageUrl = getMediaUrl(foundation.image?.url, "/placeholder-logo.jpg");
 
   return (
     <Link href={`/foundations/${foundation.siglas}`} className="group block">

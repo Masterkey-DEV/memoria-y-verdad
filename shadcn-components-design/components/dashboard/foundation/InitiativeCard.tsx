@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Eye, Edit, Trash2, Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { Initiative } from "@/types/dashboard";
+import type { Initiative } from "@/types/initiative";
 
 interface InitiativeCardProps {
   initiative: Initiative;

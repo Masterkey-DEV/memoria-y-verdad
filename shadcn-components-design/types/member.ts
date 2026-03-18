@@ -1,10 +1,15 @@
-export interface Initiative {
+// types/member.ts
+import type { Initiative } from "./initiative";
+
+export interface Member {
   id: number;
   documentId: string;
-  title: string;
-  objective?: string;
-  foundation?: { name: string; siglas: string };
-  usuario?: { id: number }[];
-  initiatives_categories?: { name: string }[];
-  createdAt: string;
+  username: string;
+  email: string;
+  role?: {
+    id: number;
+    name: string;
+    type: string;
+  };
+  initiatives?: Pick<Initiative, "id" | "documentId" | "title" | "objective">[];
 }

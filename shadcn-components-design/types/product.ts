@@ -1,12 +1,9 @@
-// @/types/product.ts
-
-export interface ProductImage {
-  url: string;
-  alternativeText?: string;
-}
+// types/product.ts
+import type { StrapiImage } from "./shared";
 
 export interface ProductCategory {
-  id: number; // ✅ number, no string
+  id: number;
+  documentId: string;
   name: string;
 }
 
@@ -15,11 +12,20 @@ export interface Product {
   documentId: string;
   name: string;
   slug: string;
-  shortDescription: string;
-  description: string;
-  price: number;
-  stock: number;
+  shortDescription: string | null;
+  description: string | null;
+  // ✅ nullable para evitar errores en .toLocaleString() y comparaciones
+  price: number | null;
+  stock: number | null;
   featured: boolean;
-  images?: ProductImage[];
+  createdAt: string;
+  updatedAt: string;
+  publishedAt: string;
+  images?: StrapiImage[];
   product_categories?: ProductCategory[];
+  usuario?: {
+    id: number;
+    documentId: string;
+    username: string;
+  };
 }
