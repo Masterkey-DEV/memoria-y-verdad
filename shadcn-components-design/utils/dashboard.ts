@@ -26,6 +26,7 @@ export const EMPTY_PROD: ProdForm = {
   price: "",
   stock: "",
   featured: false,
+  product_category_ids: [], 
 };
 
 export const inputCls =

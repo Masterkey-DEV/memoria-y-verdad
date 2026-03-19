@@ -221,6 +221,7 @@ export default function FoundationDashboard() {
           form={products.form}
           image={products.image}
           saving={products.saving}
+          jwt={jwt}
           onFormChange={products.setForm}
           onImageChange={products.setImage}
           // ✅ save necesita userId (products usa users_permissions_user)

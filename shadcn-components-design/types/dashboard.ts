@@ -75,6 +75,7 @@ export interface ProdForm {
   price: string;  // string para el input, se parsea al guardar
   stock: string;
   featured: boolean;
+  product_category_ids: number[];
 }
 
 // ─── Dashboard por rol ────────────────────────────────────────────────────────

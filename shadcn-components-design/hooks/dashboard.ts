@@ -68,14 +68,23 @@ export function useInitiatives(jwt: string | null) {
     [jwt, toast],
   );
 
-  const openCreate = useCallback(() => { setForm(EMPTY_INIT); setImage(null); setEditTarget(null); setModal("create"); }, []);
+  const openCreate = useCallback(() => {
+    setForm(EMPTY_INIT); setImage(null); setEditTarget(null); setModal("create");
+  }, []);
 
   const openEdit = useCallback((i: Initiative) => {
-    setForm({ title: i.title, objective: i.objective ?? "", description: i.description ?? "", categories: i.initiatives_categories?.map((c) => c.id) ?? [] });
+    setForm({
+      title: i.title,
+      objective: i.objective ?? "",
+      description: i.description ?? "",
+      categories: i.initiatives_categories?.map((c) => c.id) ?? [],
+    });
     setImage(null); setEditTarget(i); setModal("edit");
   }, []);
 
-  const close = useCallback(() => { setModal("closed"); setEditTarget(null); setForm(EMPTY_INIT); setImage(null); }, []);
+  const close = useCallback(() => {
+    setModal("closed"); setEditTarget(null); setForm(EMPTY_INIT); setImage(null);
+  }, []);
 
   const save = useCallback(
     async (foundDocId: string) => {
@@ -92,8 +101,14 @@ export function useInitiatives(jwt: string | null) {
           ...(imageId !== undefined ? { images: [imageId] } : {}),
         };
         const isEdit = modal === "edit" && editTarget;
-        const url = isEdit ? `${API_URL}/api/iniciatives/${editTarget.documentId}` : `${API_URL}/api/iniciatives`;
-        const res = await fetch(url, { method: isEdit ? "PUT" : "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` }, body: JSON.stringify({ data: payload }) });
+        const url = isEdit
+          ? `${API_URL}/api/iniciatives/${editTarget.documentId}`
+          : `${API_URL}/api/iniciatives`;
+        const res = await fetch(url, {
+          method: isEdit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },
+          body: JSON.stringify({ data: payload }),
+        });
         if (!res.ok) throw new Error(await extractStrapiError(res));
         toast({ title: isEdit ? "Iniciativa actualizada ✓" : "Iniciativa creada ✓" });
         await fetchInitiatives(foundDocId);
@@ -111,7 +126,10 @@ export function useInitiatives(jwt: string | null) {
       if (!jwt) return;
       setDeleting(docId);
       try {
-        const res = await fetch(`${API_URL}/api/iniciatives/${docId}`, { method: "DELETE", headers: { Authorization: `Bearer ${jwt}` } });
+        const res = await fetch(`${API_URL}/api/iniciatives/${docId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
         if (!res.ok) throw new Error(await extractStrapiError(res));
         toast({ title: "Iniciativa eliminada" });
         await fetchInitiatives(foundDocId);
@@ -123,12 +141,14 @@ export function useInitiatives(jwt: string | null) {
     [jwt, fetchInitiatives, toast],
   );
 
-  return { initiatives, fetch: fetchInitiatives, modal, editTarget, form, setForm, image, setImage, saving, deleting, openCreate, openEdit, close, save, remove };
+  return {
+    initiatives, fetch: fetchInitiatives,
+    modal, editTarget, form, setForm, image, setImage,
+    saving, deleting, openCreate, openEdit, close, save, remove,
+  };
 }
 
 // ─── Products ─────────────────────────────────────────────────────────────────
-// product content-type:
-//   usuario → Relation (manyToOne) with User  ← renombrado de users_permissions_user
 
 export function useProducts(jwt: string | null) {
   const [products, setProducts] = useState<Product[]>([]);
@@ -140,7 +160,6 @@ export function useProducts(jwt: string | null) {
   const [deleting, setDeleting] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // ✅ campo correcto: "usuario" (renombrado en Strapi)
   const fetchProducts = useCallback(
     async (userId: number) => {
       if (!jwt) return;
@@ -148,7 +167,10 @@ export function useProducts(jwt: string | null) {
         `${API_URL}/api/products` +
         `?filters[usuario][id][$eq]=${userId}` +
         `&populate[images][fields][0]=url` +
-        `&populate[images][fields][1]=name`;
+        `&populate[images][fields][1]=name` +
+        // ✅ Populamos categorías para pre-cargarlas al editar
+        `&populate[product_categories][fields][0]=id` +
+        `&populate[product_categories][fields][1]=name`;
 
       console.log("[FETCH PRODUCTS URL]", url);
       const res = await fetch(url, { headers: { Authorization: `Bearer ${jwt}` } });
@@ -159,14 +181,28 @@ export function useProducts(jwt: string | null) {
     [jwt, toast],
   );
 
-  const openCreate = useCallback(() => { setForm(EMPTY_PROD); setImage(null); setEditTarget(null); setModal("create"); }, []);
+  const openCreate = useCallback(() => {
+    setForm(EMPTY_PROD); setImage(null); setEditTarget(null); setModal("create");
+  }, []);
 
   const openEdit = useCallback((p: Product) => {
-    setForm({ name: p.name, slug: p.slug, shortDescription: p.shortDescription ?? "", description: p.description ?? "", price: p.price?.toString() ?? "", stock: p.stock?.toString() ?? "", featured: p.featured ?? false });
+    setForm({
+      name: p.name,
+      slug: p.slug,
+      shortDescription: p.shortDescription ?? "",
+      description: p.description ?? "",
+      price: p.price?.toString() ?? "",
+      stock: p.stock?.toString() ?? "",
+      featured: p.featured ?? false,
+      // ✅ Pre-selecciona las categorías existentes del producto
+      product_category_ids: p.product_categories?.map((c) => c.id) ?? [],
+    });
     setImage(null); setEditTarget(p); setModal("edit");
   }, []);
 
-  const close = useCallback(() => { setModal("closed"); setEditTarget(null); setForm(EMPTY_PROD); setImage(null); }, []);
+  const close = useCallback(() => {
+    setModal("closed"); setEditTarget(null); setForm(EMPTY_PROD); setImage(null);
+  }, []);
 
   const save = useCallback(
     async (userId: number) => {
@@ -183,15 +219,22 @@ export function useProducts(jwt: string | null) {
           price: parseFloat(form.price) || 0,
           stock: parseInt(form.stock) || 0,
           featured: form.featured,
-          // ✅ campo correcto: "usuario"
           usuario: userId,
+          // ✅ Envía las categorías seleccionadas como array de IDs
+          product_categories: form.product_category_ids ?? [],
           ...(imageId !== undefined ? { images: [imageId] } : {}),
         };
         const isEdit = modal === "edit" && editTarget;
-        const url = isEdit ? `${API_URL}/api/products/${editTarget.documentId}` : `${API_URL}/api/products`;
+        const url = isEdit
+          ? `${API_URL}/api/products/${editTarget.documentId}`
+          : `${API_URL}/api/products`;
         console.log("[SAVE PRODUCT URL]", url);
         console.log("[SAVE PRODUCT PAYLOAD]", payload);
-        const res = await fetch(url, { method: isEdit ? "PUT" : "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` }, body: JSON.stringify({ data: payload }) });
+        const res = await fetch(url, {
+          method: isEdit ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` },
+          body: JSON.stringify({ data: payload }),
+        });
         if (!res.ok) throw new Error(await extractStrapiError(res));
         toast({ title: isEdit ? "Producto actualizado ✓" : "Producto creado ✓" });
         await fetchProducts(userId);
@@ -209,7 +252,10 @@ export function useProducts(jwt: string | null) {
       if (!jwt) return;
       setDeleting(docId);
       try {
-        const res = await fetch(`${API_URL}/api/products/${docId}`, { method: "DELETE", headers: { Authorization: `Bearer ${jwt}` } });
+        const res = await fetch(`${API_URL}/api/products/${docId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${jwt}` },
+        });
         if (!res.ok) throw new Error(await extractStrapiError(res));
         toast({ title: "Producto eliminado" });
         await fetchProducts(userId);
@@ -221,7 +267,11 @@ export function useProducts(jwt: string | null) {
     [jwt, fetchProducts, toast],
   );
 
-  return { products, fetch: fetchProducts, modal, editTarget, form, setForm, image, setImage, saving, deleting, openCreate, openEdit, close, save, remove };
+  return {
+    products, fetch: fetchProducts,
+    modal, editTarget, form, setForm, image, setImage,
+    saving, deleting, openCreate, openEdit, close, save, remove,
+  };
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────
@@ -235,7 +285,9 @@ export function useCategories(jwt: string | null) {
     const res = await fetch(url, { headers: { Authorization: `Bearer ${jwt}` } });
     if (!res.ok) return;
     const data: StrapiResponse<Category[]> = await res.json();
-    setCategories(data.data?.map((c) => ({ id: c.id, documentId: c.documentId, name: c.name })) ?? []);
+    setCategories(
+      data.data?.map((c) => ({ id: c.id, documentId: c.documentId, name: c.name })) ?? [],
+    );
   }, [jwt]);
 
   return { categories, fetch: fetchCategories };
