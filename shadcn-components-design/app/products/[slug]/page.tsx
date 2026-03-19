@@ -19,7 +19,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
   if (!result.success || !result.data) notFound();
 
   const product: Product = result.data;
-  const imageUrl = getMediaUrl(product.images?.[0]?.url);
+  const imageUrl = getMediaUrl(product.images?.[0]?.url, "/holder_productos.jpeg");
 
   // ✅ FIX: price y stock son nullable en el tipo — usar ?? 0 para operaciones
   const price = product.price ?? 0;

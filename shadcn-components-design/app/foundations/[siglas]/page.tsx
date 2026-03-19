@@ -33,7 +33,7 @@ export default async function FoundationDetailPage({ params }: Props) {
   // ✅ Strapi devuelve "iniciatives" (typo en el schema — respetar tal cual)
   const initiatives: Initiative[] = foundation.iniciatives ?? [];
   const initiativeCount = initiatives.length;
-  const logoUrl = getMediaUrl(foundation.image?.url, "/placeholder-logo.jpg");
+  const logoUrl = getMediaUrl(foundation.image?.url, "/holder_fundaciones.jpeg");
 
   return (
     <main className="min-h-screen bg-background">

@@ -53,7 +53,7 @@ export default async function FoundationsPage() {
               <div className="p-8 flex items-center gap-6 border-b border-border/40 bg-muted/20">
                 <div className="relative h-20 w-20 rounded-2xl overflow-hidden border-2 border-background bg-white shadow-sm shrink-0">
                   <Image
-                    src={getMediaUrl(foundation.image?.url, "/placeholder-logo.jpg")}
+                    src={getMediaUrl(foundation.image?.url, "/holder_fundaciones.jpeg")}
                     alt={foundation.name}
                     fill
                     className="object-contain p-2"

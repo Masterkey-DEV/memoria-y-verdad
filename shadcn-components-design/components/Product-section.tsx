@@ -92,7 +92,7 @@ export function ProductsSection() {
               ? rawUrl.startsWith("http")
                 ? rawUrl
                 : `${API_URL}${rawUrl}`
-              : "/placeholder.jpg";
+              : "/holder_productos.jpeg";
 
             return (
               <ProductCard
