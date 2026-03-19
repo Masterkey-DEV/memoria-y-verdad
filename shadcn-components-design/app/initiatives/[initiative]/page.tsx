@@ -29,7 +29,7 @@ export default async function InitiativeDetailPage({ params }: PageProps) {
   if (!result.success || !result.data) notFound();
 
   const data = result.data;
-  const imageUrl = getMediaUrl(data.images?.[0]?.url);
+  const imageUrl = getMediaUrl(data.images?.[0]?.url, "/holder_iniciativas.jpeg");
   const categoryName = data.initiatives_categories?.[0]?.name || "Sin categoría";
   const hasExtraImages = (data.images?.length ?? 0) > 1;
 

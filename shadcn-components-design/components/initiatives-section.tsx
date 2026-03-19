@@ -68,7 +68,7 @@ export function InitiativesSection() {
       {initiatives.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {initiatives.map((initiative) => {
-            const imageUrl = getMediaUrl(initiative.images?.[0]?.url);
+            const imageUrl = getMediaUrl(initiative.images?.[0]?.url, "/holder_iniciativas.jpeg");
 
             const categoryName = initiative.initiatives_categories?.[0]?.name;
 

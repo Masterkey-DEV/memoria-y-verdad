@@ -121,7 +121,7 @@ export default async function FoundationDetailPage({ params }: Props) {
         {initiativeCount > 0 ? (
           <div className="grid md:grid-cols-2 gap-5">
             {initiatives.map((initiative) => {
-              const initImgUrl = getMediaUrl(initiative.images?.[0]?.url);
+              const initImgUrl = getMediaUrl(initiative.images?.[0]?.url,"/holder_iniciativas.jpeg");
               const categoryName = initiative.initiatives_categories?.[0]?.name;
               // ✅ campo correcto: "users"
               const memberCount = initiative.users?.length ?? 0;

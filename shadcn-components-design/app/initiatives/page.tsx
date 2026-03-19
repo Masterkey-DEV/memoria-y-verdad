@@ -101,7 +101,7 @@ export default async function InitiativesPage({ searchParams }: PageProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {(initiatives as any[]).map((initiative) => {
               // ✅ FIX: getMediaUrl resuelve Cloudinary y local sin doble prefijo
-              const imageUrl = getMediaUrl(initiative.images?.[0]?.url);
+              const imageUrl = getMediaUrl(initiative.images?.[0]?.url, "/holder_iniciativas.jpeg");
               const categoryName = initiative.initiatives_categories?.[0]?.name;
 
               return (
