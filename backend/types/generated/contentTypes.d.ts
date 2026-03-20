@@ -444,12 +444,16 @@ export interface ApiFoundationFoundation extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    description: Schema.Attribute.String;
+    facebook: Schema.Attribute.String;
     image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'> &
       Schema.Attribute.Required;
     iniciatives: Schema.Attribute.Relation<
       'oneToMany',
       'api::iniciative.iniciative'
     >;
+    instagram: Schema.Attribute.String;
+    linkedin: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -464,6 +468,7 @@ export interface ApiFoundationFoundation extends Struct.CollectionTypeSchema {
     siglas: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
+    twitter: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -471,6 +476,12 @@ export interface ApiFoundationFoundation extends Struct.CollectionTypeSchema {
       'oneToOne',
       'plugin::users-permissions.user'
     >;
+    website: Schema.Attribute.String;
+    whatsapp: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 10;
+        minLength: 10;
+      }>;
   };
 }
 

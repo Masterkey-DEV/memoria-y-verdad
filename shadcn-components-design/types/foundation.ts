@@ -11,11 +11,17 @@ export interface Foundation {
   description?: string | null;
   location?: string | null;
   memberCount?: number;
+  // ── Contacto y redes ──
+  whatsapp?: string | null;
+  facebook?: string | null;
+  instagram?: string | null;
+  twitter?: string | null;
+  linkedin?: string | null;
+  website?: string | null;
   createdAt: string;
   updatedAt: string;
   publishedAt: string;
   image?: StrapiImage;
-  // ⚠️ Strapi devuelve "iniciatives" (typo en el schema de Strapi, no se puede cambiar sin migración)
   iniciatives?: Initiative[];
   usuario?: {
     id: number;

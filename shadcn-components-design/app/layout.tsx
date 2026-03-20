@@ -9,7 +9,7 @@ import { AuthProvider } from "@/context/AuthContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Reintegration Portal",
+  title: "Vitrina Social",
   description: "Forjando un futuro de reconciliación",
 };
 

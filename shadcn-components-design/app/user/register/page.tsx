@@ -144,8 +144,8 @@ export default function UserRegisterPage() {
 
         <div className="text-center space-y-1">
           <Link href="/" className="inline-flex flex-col leading-[0.85]">
-            <span className="text-2xl font-black tracking-tighter italic">REINTEGRATION</span>
-            <span className="text-2xl font-black tracking-tighter text-primary italic">PORTAL</span>
+            <span className="text-2xl font-black tracking-tighter italic">VITRINA</span>
+            <span className="text-2xl font-black tracking-tighter text-primary italic">SOCIAL</span>
           </Link>
           <p className="text-muted-foreground text-sm pt-3">Elige cómo quieres participar</p>
         </div>

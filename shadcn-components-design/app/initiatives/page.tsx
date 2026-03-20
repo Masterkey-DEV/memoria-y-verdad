@@ -10,7 +10,7 @@ import { Lightbulb } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Iniciativas | Reintegration Portal",
+  title: "Iniciativas | Vitrina Social",
   description:
     "Explora programas y proyectos diseñados para impulsar tu crecimiento y desarrollo comunitario.",
 };

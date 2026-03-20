@@ -9,7 +9,7 @@ import { FoundationCTA } from "@/components/Foundationcta";
 
 
 export const metadata = {
-  title: "Fundaciones Aliadas | Reintegration Portal",
+  title: "Fundaciones Aliadas | Vitrina Social",
   description:
     "Conoce a las organizaciones que hacen posible la reconciliación y el apoyo comunitario.",
 };

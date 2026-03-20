@@ -86,7 +86,7 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px]">
               <SheetTitle className="text-left font-black text-2xl mb-8 italic">
-                REINTEGRATION <span className="text-primary">PORTAL</span>
+                VITRINA<span className="text-primary">SOCIAL</span>
               </SheetTitle>
               <nav className="flex flex-col gap-1">
                 {NAV_LINKS.map((link) => (
@@ -159,10 +159,10 @@ export function Header() {
 
           <Link href="/" className="flex flex-col leading-[0.85] shrink-0">
             <span className="text-lg font-black tracking-tighter italic">
-              REINTEGRATION
+              VITRINA
             </span>
             <span className="text-lg font-black tracking-tighter text-primary/80 italic">
-              PORTAL
+              SOCIAL
             </span>
           </Link>
 

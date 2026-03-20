@@ -46,6 +46,29 @@
     },
     "objective": {
       "type": "text"
+    },
+    "whatsapp": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 10
+    },
+    "facebook": {
+      "type": "string"
+    },
+    "instagram": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
+    },
+    "twitter": {
+      "type": "string"
+    },
+    "linkedin": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
     }
   }
 }

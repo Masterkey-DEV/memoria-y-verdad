@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps) {
   const result = await getInitiativeByDocumentId(initiative);
   if (!result.success || !result.data) return {};
   return {
-    title: `${result.data.title} | Reintegration Portal`,
+    title: `${result.data.title} | Vitrina Social`,
     description: result.data.objective,
   };
 }

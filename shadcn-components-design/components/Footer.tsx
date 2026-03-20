@@ -10,7 +10,7 @@ export function Footer() {
           <div className="lg:col-span-2">
             <h3 className="text-xl font-bold text-primary mb-3 flex items-center gap-2">
               <Globe className="h-5 w-5" />
-              Reintegration Portal
+              Vitrina Social
             </h3>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
               Dedicated to supporting the peace process and victims&apos; rights
