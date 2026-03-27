@@ -24,14 +24,6 @@ export function HomeTabs() {
 
     emprendimientos: (
       <div className="space-y-10">
-        <header className="max-w-2xl mx-auto text-center space-y-4">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter">
-            Emprendimientos con <span className="text-primary">Propósito</span>
-          </h2>
-          <p className="text-muted-foreground text-lg italic">
-            "Productos que cuentan historias de resiliencia y cambio."
-          </p>
-        </header>
         <FeaturedProductsSlider />
       </div>
     ),
