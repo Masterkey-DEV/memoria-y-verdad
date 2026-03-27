@@ -5,7 +5,7 @@ import { UseFormReturn } from "react-hook-form";
 import { MapPin } from "lucide-react";
 import { COLOMBIA, getMunicipios } from "@/data/colombia";
 import { Label } from "@/components/ui/label";
-import type { FormValues } from "@/schemas/foundation";
+import type { CompleteUserFormValues } from "@/schemas/user";
 
 const selectCls =
   "flex h-12 w-full rounded-xl border border-input bg-slate-50/50 px-4 py-2 text-sm transition-all focus:bg-white focus:ring-2 focus:ring-primary/10 outline-none appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
@@ -15,15 +15,17 @@ const DEPARTAMENTOS = [...COLOMBIA].sort((a, b) =>
 );
 
 interface Props {
-  form: UseFormReturn<FormValues>;
+  form: UseFormReturn<CompleteUserFormValues>;
 }
 
 export function ColombiaSelector({ form }: Props) {
   const [selectedDept, setSelectedDept] = useState("");
 
+  // Obtener el valor actual del departamento del formulario
   const currentDept = form.watch("department");
   const municipios = getMunicipios(selectedDept, COLOMBIA);
 
+  // Sincronizar el estado local con el formulario
   useEffect(() => {
     if (currentDept && currentDept !== selectedDept) {
       setSelectedDept(currentDept);
@@ -45,6 +47,7 @@ export function ColombiaSelector({ form }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Departamento */}
         <div className="space-y-1.5">
           <Label className="text-sm font-semibold">
             Departamento <span className="text-destructive">*</span>
@@ -71,6 +74,7 @@ export function ColombiaSelector({ form }: Props) {
           )}
         </div>
 
+        {/* Ciudad */}
         <div className="space-y-1.5">
           <Label className="text-sm font-semibold">
             Ciudad / Municipio <span className="text-destructive">*</span>

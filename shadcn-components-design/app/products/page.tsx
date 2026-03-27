@@ -12,8 +12,7 @@ export const metadata = {
 export default function ProductsPage() {
   return (
     <main className="min-h-screen bg-background">
-      {/* Header de la Sección */}
-      <div className="bg-muted/30 border-b">
+      <header className="bg-muted/30 border-b">
         <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
           <div className="max-w-3xl space-y-4">
             <h1 className="text-4xl md:text-6xl font-black tracking-tighter text-foreground">
@@ -26,7 +25,7 @@ export default function ProductsPage() {
             </p>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Área de Filtros */}
       <div className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b">

@@ -50,7 +50,8 @@
     "whatsapp": {
       "type": "string",
       "minLength": 10,
-      "maxLength": 10
+      "maxLength": 10,
+      "required": true
     },
     "facebook": {
       "type": "string"
@@ -71,12 +72,17 @@
       "type": "string"
     },
     "department": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "city": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "location": {
+      "type": "string"
+    },
+    "phone": {
       "type": "string"
     }
   }

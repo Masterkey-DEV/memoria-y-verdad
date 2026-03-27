@@ -6,22 +6,22 @@ export function HeroSection() {
   return (
     <section className="px-4 py-12 md:py-20 lg:px-8 max-w-7xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-        {/* Contenedor de Imagen - Visual de Producto + Humano */}
+        
         <div className="relative w-full h-64 md:h-96 lg:h-[500px] rounded-3xl overflow-hidden order-first lg:order-last shadow-2xl">
           <Image
-            src="/portada.jpeg" 
+            src="/ventana.png" 
             alt="Emprendedores locales integrándose a la economía digital"
             fill
             className="object-cover"
             priority
           />
-          {/* Badge de impacto opcional sobre la imagen */}
+
           <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-md">
             <p className="text-sm font-bold text-primary">Origen Verificado ✓</p>
           </div>
         </div>
 
-        {/* Contenido de Texto - El Pitch en 3 segundos */}
+
         <div className="flex flex-col items-start">
           <span className="text-primary font-bold tracking-wider uppercase text-sm mb-4">
             El Marketplace de Impacto de Colombia

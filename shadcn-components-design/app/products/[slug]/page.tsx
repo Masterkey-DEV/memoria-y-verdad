@@ -3,7 +3,7 @@ import { getMediaUrl } from "@/lib/media";
 import type { Product } from "@/types/product";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Heart, MessageCircle, Share2 } from "lucide-react";
+import { ArrowLeft, Heart, MessageCircle, Share2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -19,9 +19,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
   if (!result.success || !result.data) notFound();
 
   const product: Product = result.data;
-  const imageUrl = getMediaUrl(product.images?.[0]?.url, "/holder_productos.jpeg");
+  const imageUrl = getMediaUrl(
+    product.images?.[0]?.url,
+    "/holder_productos.jpeg",
+  );
 
-  // ✅ FIX: price y stock son nullable en el tipo — usar ?? 0 para operaciones
   const price = product.price ?? 0;
   const stock = product.stock ?? 0;
 
@@ -67,7 +69,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
               {product.name}
             </h1>
-            {/* ✅ FIX: shortDescription nullable — solo renderizar si existe */}
             {product.shortDescription && (
               <p className="text-xl text-muted-foreground leading-relaxed italic border-l-4 pl-4 border-primary/20">
                 "{product.shortDescription}"
@@ -76,7 +77,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
 
           <div className="flex items-baseline gap-4">
-            {/* ✅ FIX: price con ?? 0, nunca llama .toLocaleString() en null */}
             <span className="text-4xl font-bold text-primary">
               ${price.toLocaleString("es-CO")}
             </span>
@@ -87,7 +87,24 @@ export default async function ProductDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* ✅ FIX: description nullable — solo renderizar si existe */}
+          {/* Usuario vinculado */}
+          {product.usuario && (
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-muted/50 border border-border/60">
+              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <span className="text-sm font-black text-primary">
+                  {product.usuario.username[0].toUpperCase()}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Vendido por</p>
+                <p className="text-sm font-bold truncate">
+                  {product.usuario.username}
+                </p>
+              </div>
+              <User className="h-4 w-4 text-muted-foreground/40 ml-auto shrink-0" />
+            </div>
+          )}
+
           {product.description && (
             <div className="prose prose-gray py-6 border-y border-border/60">
               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
@@ -105,10 +122,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
               Apoyar Proyecto
             </Button>
             <div className="flex gap-4">
-              <Button variant="outline" className="flex-1 rounded-2xl h-16 border-2 hover:bg-red-50 hover:text-red-600 transition-all">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-2xl h-16 border-2 hover:bg-red-50 hover:text-red-600 transition-all"
+              >
                 <Heart className="h-6 w-6" />
               </Button>
-              <Button variant="outline" className="aspect-square p-0 rounded-2xl h-16 border-2">
+              <Button
+                variant="outline"
+                className="aspect-square p-0 rounded-2xl h-16 border-2"
+              >
                 <Share2 className="h-5 w-5" />
               </Button>
             </div>

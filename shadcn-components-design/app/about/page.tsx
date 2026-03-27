@@ -57,8 +57,8 @@ const BUSINESS = [
 ];
 
 const ROADMAP = [
-  { year: "2025", items: ["MVP en producción", "50–100 productos validados", "Red inicial de fundaciones aliadas"] },
-  { year: "2026", items: ["Expansión nacional", "Integraciones con pagos formales", "Comunidad de compradores conscientes"] },
+  { year: "2026", items: ["MVP en producción", "20–50 productos validados", "Red inicial de fundaciones aliadas"] },
+  { year: "2027", items: ["Expansión nacional", "Integraciones con pagos formales", "Comunidad de compradores conscientes"] },
 ];
 
 // ─── ANIMATION VARIANTS ───────────────────────────────────────────────────────
@@ -489,7 +489,7 @@ export default function AboutPage() {
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-center pt-2">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
                 <Link
-                  href="/productos"
+                  href="/products"
                   className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold px-8 py-4 rounded-2xl shadow-lg shadow-primary/20"
                 >
                   Explorar el catálogo
@@ -498,7 +498,7 @@ export default function AboutPage() {
               </motion.div>
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
                 <Link
-                  href="/fundaciones"
+                  href="/foundations"
                   className="inline-flex items-center gap-2 border border-border text-foreground font-bold px-8 py-4 rounded-2xl hover:bg-muted/40 transition-colors"
                 >
                   Conocer fundaciones aliadas

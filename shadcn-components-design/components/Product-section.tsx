@@ -44,10 +44,25 @@ function ProductRow({ product }: { product: Product }) {
               {product.shortDescription}
             </p>
           )}
+          {product.usuario && (
+            <div className="flex items-center gap-3 py-4 border-y border-border/60">
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <span className="text-sm font-black text-primary">
+                  {product.usuario.username[0].toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Vendido por</p>
+                <p className="text-sm font-bold">{product.usuario.username}</p>
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex items-center justify-between mt-2">
           <span className="text-lg font-bold text-primary">
-            ${product.price?.toFixed(2) ?? "0.00"}
+            {product.price != null
+              ? `$${Number(product.price).toLocaleString("es-CO")} COP`
+              : "Consultar precio"}
           </span>
           <Button size="sm" variant="ghost" className="gap-1">
             Ver detalles
@@ -60,7 +75,8 @@ function ProductRow({ product }: { product: Product }) {
 
 export function ProductsSection() {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [selectedLocalCategory, setSelectedLocalCategory] = useState<string>("all");
+  const [selectedLocalCategory, setSelectedLocalCategory] =
+    useState<string>("all");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +132,9 @@ export function ProductsSection() {
             <h3 className="font-semibold text-lg">Categorías</h3>
             <div className="flex flex-row md:flex-col flex-wrap gap-2">
               <Button
-                variant={selectedLocalCategory === "all" ? "default" : "outline"}
+                variant={
+                  selectedLocalCategory === "all" ? "default" : "outline"
+                }
                 onClick={() => setSelectedLocalCategory("all")}
                 size="sm"
                 className="justify-start"
@@ -126,7 +144,9 @@ export function ProductsSection() {
               {categories.map((cat) => (
                 <Button
                   key={cat.id}
-                  variant={selectedLocalCategory === cat.name ? "default" : "outline"}
+                  variant={
+                    selectedLocalCategory === cat.name ? "default" : "outline"
+                  }
                   onClick={() => setSelectedLocalCategory(cat.name)}
                   size="sm"
                   className="justify-start"

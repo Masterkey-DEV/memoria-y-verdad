@@ -84,8 +84,41 @@
       "target": "api::product.product",
       "mappedBy": "usuario"
     },
-    "telefono": {
+    "phone": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "whatsapp": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 10,
+      "required": true,
+      "unique": true
+    },
+    "fullName": {
       "type": "string"
+    },
+    "department": {
+      "type": "string",
+      "required": true
+    },
+    "city": {
+      "type": "string"
+    },
+    "address": {
+      "type": "string"
+    },
+    "bio": {
+      "type": "string"
+    },
+    "receiveNewsletter": {
+      "type": "boolean",
+      "default": false
+    },
+    "receiveUpdates": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

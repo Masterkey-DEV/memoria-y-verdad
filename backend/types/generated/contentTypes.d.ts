@@ -441,11 +441,11 @@ export interface ApiFoundationFoundation extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    city: Schema.Attribute.String;
+    city: Schema.Attribute.String & Schema.Attribute.Required;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    department: Schema.Attribute.String;
+    department: Schema.Attribute.String & Schema.Attribute.Required;
     description: Schema.Attribute.String;
     facebook: Schema.Attribute.String;
     image: Schema.Attribute.Media<'images' | 'files' | 'videos' | 'audios'> &
@@ -467,6 +467,7 @@ export interface ApiFoundationFoundation extends Struct.CollectionTypeSchema {
       Schema.Attribute.Required &
       Schema.Attribute.Unique;
     objective: Schema.Attribute.Text;
+    phone: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
     siglas: Schema.Attribute.String &
       Schema.Attribute.Required &
@@ -481,6 +482,7 @@ export interface ApiFoundationFoundation extends Struct.CollectionTypeSchema {
     >;
     website: Schema.Attribute.String;
     whatsapp: Schema.Attribute.String &
+      Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 10;
         minLength: 10;
@@ -1130,12 +1132,16 @@ export interface PluginUsersPermissionsUser
     draftAndPublish: false;
   };
   attributes: {
+    address: Schema.Attribute.String;
+    bio: Schema.Attribute.String;
     blocked: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    city: Schema.Attribute.String;
     confirmationToken: Schema.Attribute.String & Schema.Attribute.Private;
     confirmed: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    department: Schema.Attribute.String & Schema.Attribute.Required;
     email: Schema.Attribute.Email &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
@@ -1145,6 +1151,7 @@ export interface PluginUsersPermissionsUser
       'oneToOne',
       'api::foundation.foundation'
     >;
+    fullName: Schema.Attribute.String;
     initiatives: Schema.Attribute.Relation<
       'manyToMany',
       'api::iniciative.iniciative'
@@ -1160,15 +1167,21 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.SetMinMaxLength<{
         minLength: 6;
       }>;
+    phone: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique;
     products: Schema.Attribute.Relation<'oneToMany', 'api::product.product'>;
     provider: Schema.Attribute.String;
     publishedAt: Schema.Attribute.DateTime;
+    receiveNewsletter: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
+    receiveUpdates: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     resetPasswordToken: Schema.Attribute.String & Schema.Attribute.Private;
     role: Schema.Attribute.Relation<
       'manyToOne',
       'plugin::users-permissions.role'
     >;
-    telefono: Schema.Attribute.String;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1177,6 +1190,13 @@ export interface PluginUsersPermissionsUser
       Schema.Attribute.Unique &
       Schema.Attribute.SetMinMaxLength<{
         minLength: 3;
+      }>;
+    whatsapp: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 10;
+        minLength: 10;
       }>;
   };
 }

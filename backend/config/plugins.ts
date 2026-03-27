@@ -13,4 +13,21 @@ export default ({ env }) => ({
       },
     },
   },
+  "users-permissions": {
+    config: {
+      register: {
+        allowedFields: [
+          "fullName",
+          "phone",
+          "whatsapp",
+          "address",
+          "city",
+          "department",
+          "bio",
+          "receiveNewsletter",
+          "receiveUpdates",
+        ],
+      },
+    },
+  },
 });

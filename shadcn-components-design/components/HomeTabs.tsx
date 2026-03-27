@@ -5,11 +5,11 @@ import { useState, ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TabNav } from "./tab-nav";
 import { TabKey } from "@/const/tabs";
-
 import { FoundationsSection } from "./FoundationsSection";
 import { CategoriesSection } from "./categories-section";
 import { InitiativesSection } from "./initiatives-section"; // ✅ lowercase, nombre correcto
-import { ProductsSection } from "./Product-section";
+import { FeaturedProductsGrid } from "./product/FeaturedProductsGrid";
+import { FeaturedProductsSlider } from "./product/FeaturedProductsSlider";
 
 export function HomeTabs() {
   const [activeTab, setActiveTab] = useState<TabKey>("emprendimientos");
@@ -32,7 +32,7 @@ export function HomeTabs() {
             "Productos que cuentan historias de resiliencia y cambio."
           </p>
         </header>
-        <ProductsSection />
+        <FeaturedProductsSlider />
       </div>
     ),
 

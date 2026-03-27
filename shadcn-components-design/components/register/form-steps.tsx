@@ -1,40 +1,66 @@
-// components/register/form-steps.tsx
-
-import { LucideIcon } from "lucide-react";
+// @/components/register/form-steps.tsx (actualizado)
 import { cn } from "@/lib/utils";
+import { Check } from "lucide-react";
 
-interface FieldWrapperProps {
-  label: string;
-  error?: string;
-  // Cambiamos de 'LucideIcon' a 'any' o un tipo mÃ¡s flexible
-  icon?: React.ComponentType<{ className?: string }>; 
-  children: React.ReactNode;
-  required?: boolean;
+interface StepIndicatorProps {
+  current: number;
+  total: number;
 }
 
-export const FieldWrapper = ({ label, error, icon: Icon, children, required }: FieldWrapperProps) => (
-  <div className="space-y-2">
-    <label className="flex items-center gap-2 text-sm font-medium">
-      {/* Si Icon existe, lo renderizamos como componente */}
-      {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" />}
-      {label} {required && <span className="text-destructive">*</span>}
-    </label>
-    {children}
-    {error && <p className="text-xs text-destructive">{error}</p>}
-  </div>
-);
+export function StepIndicator({ current, total }: StepIndicatorProps) {
+  return (
+    <div className="flex items-center justify-between mb-8">
+      {Array.from({ length: total }, (_, i) => i + 1).map((step) => (
+        <div key={step} className="flex items-center flex-1">
+          <div className="flex flex-col items-center">
+            <div
+              className={cn(
+                "w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all",
+                step < current
+                  ? "bg-primary text-white"
+                  : step === current
+                    ? "bg-primary text-white ring-4 ring-primary/20"
+                    : "bg-muted text-muted-foreground",
+              )}
+            >
+              {step < current ? <Check className="h-4 w-4" /> : step}
+            </div>
+            <span className="text-xs text-muted-foreground mt-1 hidden sm:block">
+              {step === 1 && "Acceso"}
+              {step === 2 && "Personal"}
+              {step === 3 && "Preferencias"}
+            </span>
+          </div>
+          {step < total && (
+            <div
+              className={cn(
+                "flex-1 h-[2px] mx-2 transition-all",
+                step < current ? "bg-primary" : "bg-muted",
+              )}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
-
-export const StepIndicator = ({ current, total }: { current: number; total: number }) => (
-  <div className="flex gap-2 mb-8">
-    {Array.from({ length: total }).map((_, i) => (
-      <div
-        key={i}
-        className={cn(
-          "h-1.5 flex-1 rounded-full transition-all duration-500",
-          i + 1 <= current ? "bg-primary" : "bg-muted"
-        )}
-      />
-    ))}
-  </div>
-);
+export function FieldWrapper({
+  label,
+  icon: Icon,
+  children,
+}: {
+  label: string;
+  icon?: React.ElementType;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-sm font-semibold flex items-center gap-2">
+        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}

@@ -25,7 +25,6 @@ export default function RootLayout({
       >
         <AuthProvider>
           <Header />
-          {/* Añadimos un min-h para que el footer no flote en pantallas grandes */}
           <main className="min-h-[80vh]">{children}</main>
           <Footer />
           <Toaster />

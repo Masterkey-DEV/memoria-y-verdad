@@ -1,14 +1,13 @@
-// components/register/foundation/Step1Credentials.tsx
 "use client";
 
 import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import type { FormValues } from "@/schemas/foundation";
+import type { CompleteUserFormValues } from "@/schemas/user";
 
 interface Props {
-  form: UseFormReturn<FormValues>;
+  form: UseFormReturn<CompleteUserFormValues>;
 }
 
 export function Step1Credentials({ form }: Props) {
@@ -22,21 +21,20 @@ export function Step1Credentials({ form }: Props) {
     <div className="space-y-4">
       <header>
         <h3 className="text-xl font-bold italic tracking-tight">
-          Acceso Administrativo
+          Información de acceso
         </h3>
         <p className="text-sm text-muted-foreground">
-          Configura las credenciales de tu panel.
+          Crea tus credenciales para acceder a la plataforma
         </p>
       </header>
 
-      {/* Usuario */}
       <div className="space-y-1.5">
         <Label className="text-sm font-semibold">
-          Usuario <span className="text-destructive">*</span>
+          Nombre de usuario <span className="text-destructive">*</span>
         </Label>
         <input
           {...form.register("username")}
-          placeholder="ej. fundacion_paz"
+          placeholder="juanperez"
           className={inputClass}
         />
         {form.formState.errors.username && (
@@ -46,7 +44,6 @@ export function Step1Credentials({ form }: Props) {
         )}
       </div>
 
-      {/* Correo electrónico */}
       <div className="space-y-1.5">
         <Label className="text-sm font-semibold">
           Correo electrónico <span className="text-destructive">*</span>
@@ -54,7 +51,7 @@ export function Step1Credentials({ form }: Props) {
         <input
           {...form.register("email")}
           type="email"
-          placeholder="contacto@organizacion.org"
+          placeholder="tu@email.com"
           className={inputClass}
         />
         {form.formState.errors.email && (
@@ -64,7 +61,6 @@ export function Step1Credentials({ form }: Props) {
         )}
       </div>
 
-      {/* Contraseña */}
       <div className="space-y-1.5">
         <Label className="text-sm font-semibold">
           Contraseña <span className="text-destructive">*</span>
@@ -95,7 +91,6 @@ export function Step1Credentials({ form }: Props) {
         )}
       </div>
 
-      {/* Confirmar contraseña */}
       <div className="space-y-1.5">
         <Label className="text-sm font-semibold">
           Confirmar contraseña <span className="text-destructive">*</span>

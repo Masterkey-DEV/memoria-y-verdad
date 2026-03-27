@@ -1,275 +1,440 @@
+// app/user/register/page.tsx
 "use client";
 
-import { API_URL } from "@/const/api";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Users, Rocket, Check, ArrowRight, Eye, EyeOff } from "lucide-react";
+
+import { cn } from "@/lib/utils";
+import { API_URL } from "@/const/api";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import { StepIndicator } from "@/components/register/form-steps";
+import { Step1Credentials } from "@/components/register/user/Step1Credentials";
+import { Step2PersonalInfo } from "@/components/register/user/Step2PersonalInfo";
+import { Step3Preferences } from "@/components/register/user/Step3Preferences";
+import { completeUserFormSchema, CompleteUserFormValues } from "@/schemas/user";
 
+// --- Tipos auxiliares ---
 type RoleType = "member" | "entrepreneur";
+type UserUpdatePayload = Partial<
+  Pick<
+    CompleteUserFormValues,
+    | "fullName"
+    | "phone"
+    | "whatsapp"
+    | "address"
+    | "city"
+    | "department"
+    | "bio"
+    | "receiveNewsletter"
+    | "receiveUpdates"
+  >
+>;
 
-const formSchema = z.object({
-  username: z.string().min(3, "Mínimo 3 caracteres"),
-  email: z.string().email("Correo inválido"),
-  password: z.string().min(8, "Mínimo 8 caracteres"),
-});
+const TOTAL_STEPS = 3;
+const STEP_FIELDS: Record<number, (keyof CompleteUserFormValues)[]> = {
+  1: ["username", "email", "password", "confirmPassword"],
+  2: ["phone", "whatsapp", "city", "department"],
+  3: [],
+};
 
-const ROLES = [
-  {
-    id: "member" as RoleType,
-    label: "Miembro",
-    description: "Únete a iniciativas y programas comunitarios",
-    icon: Users,
-    perks: ["Unirte a iniciativas", "Red de apoyo", "Acceso a programas"],
-  },
-  {
-    id: "entrepreneur" as RoleType,
-    label: "Emprendedor",
-    description: "Publica y gestiona tus productos",
-    icon: Rocket,
-    perks: [
-      "Publicar productos",
-      "Gestionar tienda",
-      "Vinculación opcional a fundación",
-    ],
-  },
-];
+// --- Servicios (podrían ir en otro archivo) ---
+async function registerUser(values: CompleteUserFormValues) {
+  const { confirmPassword, ...payload } = values; // omitimos confirmPassword
+  const res = await fetch(`${API_URL}/api/auth/local/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message ?? "Error al registrar");
+  return { jwt: data.jwt, user: data.user };
+}
 
+async function assignRole(jwt: string, role: RoleType) {
+  const res = await fetch(`${API_URL}/api/users/set-role`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: JSON.stringify({ role }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message ?? "Error al asignar rol");
+  return data;
+}
+
+async function updateUserProfile(jwt: string, payload: UserUpdatePayload) {
+  if (Object.keys(payload).length === 0) return;
+  const res = await fetch(`${API_URL}/api/users/me`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    console.warn("No se pudo actualizar el perfil", data);
+  }
+}
+
+// --- Componentes pequeños ---
+function RoleCard({
+  role,
+  title,
+  description,
+  perks,
+  isSelected,
+  onSelect,
+}: {
+  role: string;
+  title: string;
+  description: string;
+  perks: string[];
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={cn(
+        "relative text-left p-5 rounded-2xl border-2 transition-all duration-200",
+        isSelected
+          ? "border-primary bg-primary/5"
+          : "border-border hover:border-primary/30 hover:bg-muted/50",
+      )}
+    >
+      {isSelected && (
+        <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
+          <Check className="h-3 w-3 text-white" />
+        </div>
+      )}
+      <h3 className="font-black text-base mb-1">{title}</h3>
+      <p className="text-muted-foreground text-xs leading-relaxed mb-3">
+        {description}
+      </p>
+      <ul className="space-y-1">
+        {perks.map((perk) => (
+          <li
+            key={perk}
+            className="text-[10px] text-muted-foreground flex items-center gap-1.5"
+          >
+            <div
+              className={cn(
+                "h-1 w-1 rounded-full",
+                isSelected ? "bg-primary" : "bg-muted-foreground/40",
+              )}
+            />
+            {perk}
+          </li>
+        ))}
+      </ul>
+    </button>
+  );
+}
+
+function RoleSelector({
+  selectedRole,
+  onSelect,
+}: {
+  selectedRole: RoleType | null;
+  onSelect: (role: RoleType) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="text-center space-y-2">
+        <h3 className="text-2xl font-black">Elige tu rol</h3>
+        <p className="text-muted-foreground">
+          ¿Cómo quieres participar en la plataforma?
+        </p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <RoleCard
+          role="member"
+          title="Miembro"
+          description="Únete a iniciativas y programas comunitarios"
+          perks={["Unirte a iniciativas", "Red de apoyo", "Acceso a programas"]}
+          isSelected={selectedRole === "member"}
+          onSelect={() => onSelect("member")}
+        />
+        <RoleCard
+          role="entrepreneur"
+          title="Emprendedor"
+          description="Publica y gestiona tus productos"
+          perks={[
+            "Publicar productos",
+            "Gestionar tienda",
+            "Vinculación opcional a fundación",
+          ]}
+          isSelected={selectedRole === "entrepreneur"}
+          onSelect={() => onSelect("entrepreneur")}
+        />
+      </div>
+    </div>
+  );
+}
+
+// --- Componente principal ---
 export default function UserRegisterPage() {
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const { login } = useAuth();
   const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: { username: "", email: "", password: "" },
+  const form = useForm<CompleteUserFormValues>({
+    resolver: zodResolver(completeUserFormSchema),
+    mode: "onChange",
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      fullName: "",
+      phone: "",
+      whatsapp: "",
+      address: "",
+      city: "",
+      department: "",
+      bio: "",
+      receiveNewsletter: false,
+      receiveUpdates: false,
+    },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const nextStep = async () => {
+    const fields = STEP_FIELDS[step];
+    if (fields?.length) {
+      const isValid = await form.trigger(fields);
+      if (!isValid) return;
+    }
+    setStep((prev) => Math.min(prev + 1, TOTAL_STEPS));
+  };
+
+  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+
+  const onSubmit = async (values: CompleteUserFormValues) => {
     if (!selectedRole) {
-      toast({ variant: "destructive", title: "Selecciona un rol para continuar" });
+      toast({
+        variant: "destructive",
+        title: "Selecciona un rol para continuar",
+      });
       return;
     }
 
     setLoading(true);
-
     try {
-      const regRes = await fetch(`${API_URL}/api/auth/local/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+      // 1. Registrar usuario
+      const { jwt, user } = await registerUser({
+        username: values.username,
+        email: values.email,
+        password: values.password,
       });
 
-      const regData = await regRes.json();
+      // 2. Asignar rol
+      await assignRole(jwt, selectedRole);
 
-      if (!regRes.ok) {
-        const isDuplicate =
-          regRes.status === 500 ||
-          String(regData?.error?.message ?? "").toLowerCase().includes("already taken");
+      // 3. Actualizar perfil con datos opcionales
+      const updatePayload: UserUpdatePayload = {
+        ...(values.fullName?.trim() && { fullName: values.fullName.trim() }),
+        ...(values.phone?.trim() && { phone: values.phone.trim() }),
+        ...(values.whatsapp?.trim() && { whatsapp: values.whatsapp.trim() }),
+        ...(values.address?.trim() && { address: values.address.trim() }),
+        ...(values.city?.trim() && { city: values.city.trim() }),
+        ...(values.department?.trim() && {
+          department: values.department.trim(),
+        }),
+        ...(values.bio?.trim() && { bio: values.bio.trim() }),
+        ...(values.receiveNewsletter !== undefined && {
+          receiveNewsletter: values.receiveNewsletter,
+        }),
+        ...(values.receiveUpdates !== undefined && {
+          receiveUpdates: values.receiveUpdates,
+        }),
+      };
+      await updateUserProfile(jwt, updatePayload);
 
-        if (isDuplicate) {
-          setError("email", { type: "manual", message: "Usuario o correo ya están en uso" });
-          setError("username", { type: "manual", message: "Usuario o correo ya están en uso" });
-          toast({
-            variant: "destructive",
-            title: "Cuenta ya existente",
-            description: "El correo o usuario ya están en uso.",
-          });
-          return;
-        }
-
-        toast({
-          variant: "destructive",
-          title: "Error al registrar",
-          description: regData?.error?.message ?? "Error desconocido",
-        });
-        return;
-      }
-
-      const jwt = regData.jwt;
-
-      const roleRes = await fetch(`${API_URL}/api/users/set-role`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`,
-        },
-        body: JSON.stringify({ role: selectedRole }),
+      // 4. Login automático
+      await login(jwt);
+      toast({
+        title: "¡Bienvenido!",
+        description: "Tu cuenta fue creada correctamente.",
       });
 
-      const roleData = await roleRes.json();
-
-      if (!roleRes.ok) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: roleData?.error?.message ?? "Error al asignar rol",
-        });
-        return;
-      }
-
-      localStorage.setItem("jwt", jwt);
-      localStorage.setItem("user", JSON.stringify(regData.user));
-
-      toast({ title: "¡Bienvenido!", description: "Tu cuenta fue creada correctamente." });
-      router.push(selectedRole === "entrepreneur" ? "/products" : "/initiatives");
-
-    } catch {
+      // Redirigir según rol
+      router.push(
+        selectedRole === "entrepreneur"
+          ? "/dashboard/entrepreneur"
+          : "/initiatives",
+      );
+    } catch (error) {
+      console.error("Error en registro:", error);
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
       toast({
         variant: "destructive",
         title: "Error inesperado",
-        description: "Verifica la conexión con el servidor",
+        description: message,
       });
+      // Si el error es por duplicado, podríamos hacer un manejo más específico
+      if (message.toLowerCase().includes("already taken")) {
+        form.setError("email", {
+          type: "manual",
+          message: "Usuario o correo ya están en uso",
+        });
+        form.setError("username", {
+          type: "manual",
+          message: "Usuario o correo ya están en uso",
+        });
+        setStep(1);
+      }
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  const roleLabels = { member: "Miembro", entrepreneur: "Emprendedor" };
 
   return (
-    <div className="min-h-screen bg-muted/30 flex items-center justify-center p-6">
-      <div className="w-full max-w-lg space-y-8">
-
-        <div className="text-center space-y-1">
-          <Link href="/" className="inline-flex flex-col leading-[0.85]">
-            <span className="text-2xl font-black tracking-tighter italic">VITRINA</span>
-            <span className="text-2xl font-black tracking-tighter text-primary italic">SOCIAL</span>
+    <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4 md:p-8">
+      <div className="w-full max-w-xl">
+        <div className="text-center mb-8">
+          <Link
+            href="/"
+            className="inline-block hover:opacity-80 transition-opacity"
+          >
+            <h2 className="text-2xl font-black tracking-tighter italic">
+              VITRINA <span className="text-primary">SOCIAL</span>
+            </h2>
           </Link>
-          <p className="text-muted-foreground text-sm pt-3">Elige cómo quieres participar</p>
         </div>
 
-        <div className="bg-card border border-border rounded-3xl p-8 shadow-sm space-y-6">
-
-          {/* Role selector */}
-          <div className="grid grid-cols-2 gap-3">
-            {ROLES.map((role) => {
-              const Icon = role.icon;
-              const isSelected = selectedRole === role.id;
-              return (
-                <button
-                  key={role.id}
-                  type="button"
-                  onClick={() => setSelectedRole(role.id)}
-                  className={cn(
-                    "relative text-left p-5 rounded-2xl border-2 transition-all duration-200",
-                    isSelected
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/30 hover:bg-muted/50",
-                  )}
+        <div className="bg-card border border-border rounded-3xl p-8 shadow-xl">
+          {!selectedRole ? (
+            <>
+              <RoleSelector
+                selectedRole={selectedRole}
+                onSelect={setSelectedRole}
+              />
+              <p className="mt-6 text-center text-xs text-muted-foreground">
+                ¿Ya tienes cuenta?{" "}
+                <Link
+                  href="/login"
+                  className="text-primary font-semibold hover:underline"
                 >
-                  {isSelected && (
-                    <div className="absolute top-3 right-3 h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                      <Check className="h-3 w-3 text-white" />
-                    </div>
-                  )}
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center mb-3", isSelected ? "bg-primary/10" : "bg-muted")}>
-                    <Icon className={cn("h-5 w-5", isSelected ? "text-primary" : "text-muted-foreground")} />
-                  </div>
-                  <h3 className="font-black text-base mb-1">{role.label}</h3>
-                  <p className="text-muted-foreground text-xs leading-relaxed mb-3">{role.description}</p>
-                  <ul className="space-y-1">
-                    {role.perks.map((perk) => (
-                      <li key={perk} className="text-[10px] text-muted-foreground flex items-center gap-1.5">
-                        <div className={cn("h-1 w-1 rounded-full shrink-0", isSelected ? "bg-primary" : "bg-muted-foreground/40")} />
-                        {perk}
-                      </li>
-                    ))}
-                  </ul>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold">Usuario</label>
-                <input
-                  {...register("username")}
-                  placeholder="juanperez"
-                  className={cn(
-                    "w-full border rounded-xl px-4 py-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all placeholder:text-muted-foreground",
-                    errors.username ? "border-destructive focus:ring-destructive/30" : "border-input"
-                  )}
-                />
-                {errors.username && <p className="text-destructive text-xs">{errors.username.message}</p>}
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold">Email</label>
-                <input
-                  {...register("email")}
-                  type="email"
-                  placeholder="tu@email.com"
-                  className={cn(
-                    "w-full border rounded-xl px-4 py-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all placeholder:text-muted-foreground",
-                    errors.email ? "border-destructive focus:ring-destructive/30" : "border-input"
-                  )}
-                />
-                {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold">Contraseña</label>
-              <div className="relative">
-                <input
-                  {...register("password")}
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Mínimo 8 caracteres"
-                  className={cn(
-                    "w-full border rounded-xl px-4 py-3 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring transition-all pr-10 placeholder:text-muted-foreground",
-                    errors.password ? "border-destructive focus:ring-destructive/30" : "border-input"
-                  )}
-                />
+                  Inicia sesión
+                </Link>
+              </p>
+            </>
+          ) : (
+            <>
+              <StepIndicator current={step} total={TOTAL_STEPS} />
+              <div className="mt-2 mb-4 text-center">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                  Registro como {roleLabels[selectedRole]}
+                </span>
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setSelectedRole(null)}
+                  className="ml-2 text-xs text-muted-foreground hover:text-primary underline"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  Cambiar rol
                 </button>
               </div>
-              {errors.password && <p className="text-destructive text-xs">{errors.password.message}</p>}
-            </div>
 
-            <Button
-              type="submit"
-              disabled={loading || !selectedRole}
-              className="w-full rounded-xl h-12 font-bold gap-2 group"
-            >
-              {loading ? (
-                "Creando cuenta..."
-              ) : selectedRole ? (
-                <>
-                  Registrarme como {selectedRole === "member" ? "Miembro" : "Emprendedor"}
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              ) : (
-                "Selecciona un rol para continuar"
-              )}
-            </Button>
-          </form>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
+                <AnimatePresence mode="wait">
+                  {step === 1 && (
+                    <motion.div
+                      key="step1"
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                    >
+                      <Step1Credentials form={form} />
+                    </motion.div>
+                  )}
+                  {step === 2 && (
+                    <motion.div
+                      key="step2"
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                    >
+                      <Step2PersonalInfo form={form} />
+                    </motion.div>
+                  )}
+                  {step === 3 && (
+                    <motion.div
+                      key="step3"
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                    >
+                      <Step3Preferences form={form} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-          <p className="text-center text-muted-foreground text-xs">
-            ¿Ya tienes cuenta?{" "}
-            <Link href="/login" className="text-primary font-semibold hover:underline">
-              Inicia sesión
-            </Link>
-          </p>
+                <div className="flex gap-3 pt-6 border-t border-border">
+                  {step > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={prevStep}
+                      className="rounded-xl h-12 px-6"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      Atrás
+                    </Button>
+                  )}
+                  {step < TOTAL_STEPS && (
+                    <Button
+                      type="button"
+                      onClick={nextStep}
+                      className="flex-1 rounded-xl h-12 font-bold shadow-md"
+                    >
+                      Siguiente
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  )}
+                  {step === TOTAL_STEPS && (
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 rounded-xl h-12 font-bold shadow-md"
+                    >
+                      {loading ? "Registrando..." : "Finalizar registro"}
+                      {!loading && <Check className="h-4 w-4 ml-2" />}
+                    </Button>
+                  )}
+                </div>
+              </form>
 
+              <p className="mt-6 text-center text-xs text-muted-foreground">
+                ¿Ya tienes cuenta?{" "}
+                <Link
+                  href="/login"
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Inicia sesión
+                </Link>
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>
