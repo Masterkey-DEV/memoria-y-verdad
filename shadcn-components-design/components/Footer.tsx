@@ -7,6 +7,7 @@ const FOOTER_LINKS = {
     { label: "Productos", href: "/products" },
     { label: "Fundaciones", href: "/foundations" },
     { label: "Iniciativas", href: "/initiatives" },
+    { label: "Apoyar con donacion", href: "/apoyo" },
   ],
   legal: [
     { label: "Politica de privacidad", href: "#" },
